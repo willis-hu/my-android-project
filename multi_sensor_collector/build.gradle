@@ -25,6 +25,7 @@ dependencies {
     compile project(':publiclibs')
 //    compile 'com.android.support:appcompat-v7:23.1.1'
 //    直接添加会报错，更改一下sdk版本让两个包的sdk一致即可
+//    所有的gradle都更改过，sdk版本从23提升到了25
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:23.1.1'
     compile files('libs/accessory-v2.3.0.jar')

@@ -33,6 +33,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
 
     protected ShakingData cuShakingData = new ShakingData();
     private volatile boolean stop;
+    private int capture_time = 0;
 
     private OutputStream outputStream;
     private FileWriter fileWriter;
@@ -102,9 +103,15 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
                         setChanged();
 //                    用来设置一个内部标志位注明数据发生了变化
                         try {
+//                           这里添加控制，控制拍照间隔
+
                             Thread.sleep(PublicConstants.SENSOPR_PERIOD);
 //                        一个传感器周期获取一次数据
                             String info = cuShakingData.getCSV();
+                            capture_time++;
+                            if(capture_time >20){
+
+                            }
 //                        传感器不停变动，但是获取数据是一个传感器周期内获取一次
                             Log.d(TAG, info);
                             if(fileWriter != null)  fileWriter.write(info);
