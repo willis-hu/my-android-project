@@ -1,6 +1,8 @@
 package com.leocai.multidevicesalign;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,6 +26,7 @@ import com.leocai.publiclibs.multidecicealign.SensorGlobalWriter;
 import com.leocai.publiclibs.multidecicealign.SensorSokectWriter;
 import com.leocai.publiclibs.multidecicealign.StartCallBack;
 import com.leocai.publiclibs.multidecicealign.StopCallBack;
+import com.androidhiddencamera.HiddenCameraFragment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -76,6 +79,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     private SensorSokectWriter socketWriter = new SensorSokectWriter();
     private Switch writeCSVSwitch;
 
+    private HiddenCameraFragment mHiddenCameraFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +95,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         edt_frequency = (EditText) findViewById(R.id.edt_sensor_frequency);
         writeCSVSwitch = (Switch) findViewById(R.id.switch_writecsv);
         init();
+        startService(new Intent(BleSyncActivity.this,DemoCamService.class));
     }
 
     public void init(){
@@ -150,6 +156,11 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         mySensorManager.setFrequency(frequency);
                         mySensorManager.startSensor();
                         mySensorManager.startDetection();
+
+//                        在这里添加拍照控制逻辑，试一下
+                        /*intent.setAction("android.intent.action.RESPOND_VIA_MESSAGE");
+                        startService(intent);*/
+
                         ((Button) v).setText("STOP");
                         currentState = STARTING;
                         etFileName.setEnabled(false);
@@ -158,6 +169,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                     case STARTING:
                         mySensorManager.stop();
                         currentState = STOPPED;
+//                        stopService(intent);
                         ((Button) v).setText("START");
                         etFileName.setEnabled(true);
                         showLog("Sensor Listener Stopped");

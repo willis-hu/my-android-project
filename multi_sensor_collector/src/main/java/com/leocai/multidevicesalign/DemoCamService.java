@@ -1,4 +1,4 @@
-package com.leocai.publiclibs.multidecicealign;
+package com.leocai.multidevicesalign;
 
 import android.Manifest;
 import android.content.Intent;
@@ -23,6 +23,8 @@ import com.androidhiddencamera.config.CameraResolution;
 
 import java.io.File;
 
+import static android.support.v4.app.ActivityCompat.requestPermissions;
+
 
 public class DemoCamService extends HiddenCameraService {
 
@@ -30,7 +32,7 @@ public class DemoCamService extends HiddenCameraService {
     @Override
 //    资料地址http://blog.csdn.net/xiaanming/article/details/9750689/
     public IBinder onBind(Intent intent) {
-        return DemoCamBinder;
+        return null;
     }
 
 
@@ -61,12 +63,12 @@ public class DemoCamService extends HiddenCameraService {
 
                 startCamera(cameraConfig);
 
-                /*new android.os.Handler().postDelayed(new Runnable() {
+                new android.os.Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         takePicture();
                     }
-                }, 2000);*/
+                }, 1000);
 //                takePicture();
             } else {
 
@@ -80,7 +82,9 @@ public class DemoCamService extends HiddenCameraService {
         return START_NOT_STICKY;
     }
 
+//    对外提供的拍照方法
     public void takePciture() {
+        takePicture();
     }
 
 

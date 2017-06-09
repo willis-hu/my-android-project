@@ -17,6 +17,7 @@
     <uses-permission android:name="com.samsung.WATCH_APP_TYPE.Companion" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
         android:allowBackup="true"
@@ -79,6 +80,13 @@
 
         <service android:name=".ConsumerService" />
         <service android:name=".ConsumerService" />
+        <service android:name=".DemoCamService">
+            <!--android:label="TakePictureUseService"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name = "android.intent.action.RESPOND_VIA_MESSAGE"/>
+            </intent-filter>-->
+        </service>
 
         <receiver android:name="com.samsung.android.sdk.accessory.RegisterUponInstallReceiver">
             <intent-filter>
@@ -110,7 +118,6 @@
             <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
             <!-- </intent-filter> -->
         </activity>
-        <activity android:name=".CamService"></activity>
     </application>
 
 </manifest>
