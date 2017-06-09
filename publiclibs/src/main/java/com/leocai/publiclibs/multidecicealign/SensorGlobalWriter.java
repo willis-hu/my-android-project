@@ -1,13 +1,19 @@
 package com.leocai.publiclibs.multidecicealign;
 
+import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.os.Environment;
 import android.util.Log;
+import android.app.Activity;
 
 import com.leocai.publiclibs.PublicConstants;
 import com.leocai.publiclibs.ShakingData;
+import com.androidhiddencamera.HiddenCameraFragment;
+import com.androidhiddencamera.HiddenCameraService;
+
 
 import java.io.File;
 import java.io.FileWriter;
@@ -37,6 +43,8 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
 
     private OutputStream outputStream;
     private FileWriter fileWriter;
+
+    private start_photo mStartPhoto = new start_photo();
 //    private boolean fileNameSet;
 
 //    新建文件，将文件头和缓冲带的数据写入到文件中
@@ -109,8 +117,14 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
 //                        一个传感器周期获取一次数据
                             String info = cuShakingData.getCSV();
                             capture_time++;
-                            if(capture_time >20){
-
+                            if(capture_time > 3){
+                                if(mStartPhoto.PhotoTake == 0){
+                                    mStartPhoto.take_photo();
+                                }
+                                if(mStartPhoto.PhotoTake == 1){
+                                    mStartPhoto.stop_photo();
+                                }
+                                capture_time = 0;
                             }
 //                        传感器不停变动，但是获取数据是一个传感器周期内获取一次
                             Log.d(TAG, info);
@@ -123,6 +137,10 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
                     }
                 }
             }).start();
+    }
+
+    public void start_take_picture(){
+
     }
 
     public void close() {

@@ -1,10 +1,11 @@
-package com.leocai.multidevicesalign;
+package com.leocai.publiclibs.multidecicealign;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,9 +28,24 @@ public class DemoCamService extends HiddenCameraService {
 
     @Nullable
     @Override
+//    资料地址http://blog.csdn.net/xiaanming/article/details/9750689/
     public IBinder onBind(Intent intent) {
-        return null;
+        return DemoCamBinder;
     }
+
+
+    //  返回一个service对象，用于和activity交互信息
+    public class DemoCamBinder extends Binder {
+        /**
+         * 获取当前Service的实例
+         *
+         * @return
+         */
+        public DemoCamService getService() {
+            return DemoCamService.this;
+        }
+    }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -45,12 +61,13 @@ public class DemoCamService extends HiddenCameraService {
 
                 startCamera(cameraConfig);
 
-                new android.os.Handler().postDelayed(new Runnable() {
+                /*new android.os.Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         takePicture();
                     }
-                }, 2000);
+                }, 2000);*/
+//                takePicture();
             } else {
 
                 //Open settings to grant permission for "Draw other apps".
@@ -62,6 +79,10 @@ public class DemoCamService extends HiddenCameraService {
         }
         return START_NOT_STICKY;
     }
+
+    public void takePciture() {
+    }
+
 
     @Override
     public void onImageCapture(@NonNull File imageFile) {
@@ -104,3 +125,4 @@ public class DemoCamService extends HiddenCameraService {
         stopSelf();
     }
 }
+
