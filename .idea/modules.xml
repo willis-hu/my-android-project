@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Multi-Sensor-DataCollector-master.iml" filepath="$PROJECT_DIR$/Multi-Sensor-DataCollector-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/detection_unused/detection_unused.iml" filepath="$PROJECT_DIR$/detection_unused/detection_unused.iml" />
       <module fileurl="file://$PROJECT_DIR$/multi_sensor_collector/multi_sensor_collector.iml" filepath="$PROJECT_DIR$/multi_sensor_collector/multi_sensor_collector.iml" />
+      <module fileurl="file://$PROJECT_DIR$/my-android-project.iml" filepath="$PROJECT_DIR$/my-android-project.iml" />
       <module fileurl="file://$PROJECT_DIR$/publiclibs/publiclibs.iml" filepath="$PROJECT_DIR$/publiclibs/publiclibs.iml" />
       <module fileurl="file://$PROJECT_DIR$/unsued1/unsued1.iml" filepath="$PROJECT_DIR$/unsued1/unsued1.iml" />
       <module fileurl="file://$PROJECT_DIR$/wear_depracated/wear_depracated.iml" filepath="$PROJECT_DIR$/wear_depracated/wear_depracated.iml" />
