@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -56,7 +57,7 @@ public class DemoCamService extends HiddenCameraService {
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
                 CameraConfig cameraConfig = new CameraConfig()
                         .getBuilder(this)
-                        .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
+                        .setCameraFacing(CameraFacing.REAR_FACING_CAMERA)
                         .setCameraResolution(CameraResolution.MEDIUM_RESOLUTION)
                         .setImageFormat(CameraImageFormat.FORMAT_JPEG)
                         .build();
@@ -69,6 +70,17 @@ public class DemoCamService extends HiddenCameraService {
                         takePicture();
                     }
                 }, 1000);
+                /*final Handler handler = new Handler();
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        takePicture();
+                        handler.postDelayed(this,2000);
+                    }
+                };
+
+
+                handler.postDelayed(runnable,2000);*/
 //                takePicture();
             } else {
 

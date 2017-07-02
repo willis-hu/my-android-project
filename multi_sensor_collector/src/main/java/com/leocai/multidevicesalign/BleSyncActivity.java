@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -27,6 +28,7 @@ import com.leocai.publiclibs.multidecicealign.SensorSokectWriter;
 import com.leocai.publiclibs.multidecicealign.StartCallBack;
 import com.leocai.publiclibs.multidecicealign.StopCallBack;
 import com.androidhiddencamera.HiddenCameraFragment;
+import com.leocai.multidevicesalign.DemoCamService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -95,7 +97,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         edt_frequency = (EditText) findViewById(R.id.edt_sensor_frequency);
         writeCSVSwitch = (Switch) findViewById(R.id.switch_writecsv);
         init();
-        startService(new Intent(BleSyncActivity.this,DemoCamService.class));
+//        这是在开始运行时拍一次照片
+//        startService(new Intent(BleSyncActivity.this,DemoCamService.class));
     }
 
     public void init(){
@@ -158,8 +161,16 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         mySensorManager.startDetection();
 
 //                        在这里添加拍照控制逻辑，试一下
-                        /*intent.setAction("android.intent.action.RESPOND_VIA_MESSAGE");
-                        startService(intent);*/
+//                        使用handler来控制循环执行，2000ms执行一次，时间动态可调节。
+                        final Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                startService(new Intent(BleSyncActivity.this,DemoCamService.class));
+                                handler.postDelayed(this,2000);
+                            }
+                        };
+                        handler.postDelayed(runnable,2000);
 
                         ((Button) v).setText("STOP");
                         currentState = STARTING;
@@ -169,7 +180,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                     case STARTING:
                         mySensorManager.stop();
                         currentState = STOPPED;
-//                        stopService(intent);
+//                        handler.removeCallbacks(runnable);
+                        stopService(new Intent(BleSyncActivity.this,DemoCamService.class));
                         ((Button) v).setText("START");
                         etFileName.setEnabled(true);
                         showLog("Sensor Listener Stopped");
