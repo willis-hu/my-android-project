@@ -1,11 +1,14 @@
 package com.leocai.publiclibs;
 
+import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.SensorManager;
+import android.location.LocationManager;
 import android.provider.Settings;
 import android.util.Log;
 
 import com.dislab.leocai.spacesync.utils.MatrixUtils;
+import com.leocai.publiclibs.multidecicealign.GpsLocation;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +28,8 @@ import java.util.Random;
  * 传感器数据封装
  */
 public class ShakingData implements Serializable, Cloneable {
+
+
 
     private static final long serialVersionUID = -6091530420906090649L;
     private static final String TAG = "ShakingData";
@@ -86,6 +91,11 @@ public class ShakingData implements Serializable, Cloneable {
 
     private float[] usingAccData = new float[3];
     private float[] usingMagData = new float[3];
+
+/*    private LocationManager myLocationManager;
+    private GpsLocation myGpsLocation = new GpsLocation(myLocationManager);*/
+    private StringBuffer satelliteInfo;
+    private int satelliteNum;
 
 
 
@@ -440,6 +450,8 @@ public class ShakingData implements Serializable, Cloneable {
         info.append("Timestamp");
         info.append(",");
         info.append("dt");
+        info.append(",");
+        info.append("GpsInfo");
         info.append("\n");
         return info.toString();
     }
@@ -489,6 +501,21 @@ public class ShakingData implements Serializable, Cloneable {
         info.append(sdf.format(new Date(System.currentTimeMillis())));
         info.append(",");
         info.append(this.dt);
+        /*if (myGpsLocation != null) {
+            info.append(",");
+            info.append(myGpsLocation.getSatelliteInfo());
+            info.append(",");
+            info.append(myGpsLocation.getSatellliteNum());
+            if (myGpsLocation.getSatellliteNum() != 0)
+                Log.i(TAG,"satelliteNum is not 0");
+//            Log.i(TAG,"myGpsLocation is not null");
+        }*/
+        info.append(",");
+        info.append(satelliteInfo);
+        info.append(",");
+        info.append(satelliteNum);
+        if(satelliteNum != 0)   Log.i(TAG,"Satelllite num is not 0");
+
         info.append("\n");
 
         return info.toString();
@@ -521,5 +548,32 @@ public class ShakingData implements Serializable, Cloneable {
         convertedData = MatrixUtils.convertMatrixToVector(tempData);
         Log.d(TAG, Arrays.toString(convertedData));
 
+    }
+
+    /*public void useGpsLocation(Context context){
+        myLocationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        myGpsLocation = new GpsLocation(myLocationManager);
+        myGpsLocation.setMyContext(context);
+        myGpsLocation.isOpenGps();
+        myGpsLocation.formListenerGetLocation();
+        myGpsLocation.getGpsStatus();
+        myGpsLocation.getStatusListener();
+    }*/
+
+    public void setSatelliteInfo(StringBuffer satelliteinfo){
+        satelliteInfo = satelliteinfo;
+//        Log.i(TAG,"satelliteInfo are " + satelliteinfo.toString());
+    }
+
+    public void setSatelliteNum(int satellitenum){
+        satelliteNum = satellitenum;
+    }
+
+    public StringBuffer getSatelliteInfo(){
+        return satelliteInfo;
+    }
+
+    public int getSatelliteNum(){
+        return satelliteNum;
     }
 }

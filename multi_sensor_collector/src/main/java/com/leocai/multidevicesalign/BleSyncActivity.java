@@ -77,7 +77,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     private String masterAddress;
     private int frequency;
 
-    private SensorGlobalWriter csvWriter = new SensorGlobalWriter();
+//    这里更改了下初始化方法
+    private SensorGlobalWriter csvWriter;
     private SensorSokectWriter socketWriter = new SensorSokectWriter();
     private Switch writeCSVSwitch;
 
@@ -88,6 +89,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ble_sync);
+//        csvWriter = new SensorGlobalWriter(this);
+
         tv_log = (TextView) findViewById(R.id.tv_log);
 //        btnMaster = (Button) findViewById(R.id.btn_master);
 //        btnClient = (Button) findViewById(R.id.btn_client);
@@ -145,11 +148,11 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         saveFrequncy(frequency);
                         saveCSVSwitch(writeCSVSwitch.isChecked());
                         mySensorManager = new MySensorManager(BleSyncActivity.this);
-                        if(writeCSVSwitch.isChecked()){
+                        /*if(writeCSVSwitch.isChecked()){
                             mySensorManager.setGlobalWriter(csvWriter);
                         }else {
                             mySensorManager.setGlobalWriter(socketWriter);
-                        }
+                        }*/
                         try {
                             mySensorManager.setFileName(fileName);
                         } catch (IOException e) {
@@ -167,10 +170,10 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                             @Override
                             public void run() {
                                 startService(new Intent(BleSyncActivity.this,DemoCamService.class));
-                                handler.postDelayed(this,2000);
+                                handler.postDelayed(this,5000);
                             }
                         };
-                        handler.postDelayed(runnable,2000);
+                        handler.postDelayed(runnable,5000);
 
                         ((Button) v).setText("STOP");
                         currentState = STARTING;

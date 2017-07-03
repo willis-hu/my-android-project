@@ -39,7 +39,7 @@ public class MySensorManager {
         mSensorLinear = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         mSensorPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
-        sensorGlobalWriter = new SensorGlobalWriter();
+        sensorGlobalWriter = new SensorGlobalWriter(context);
     }
 
     /**

@@ -29,6 +29,8 @@ import static android.support.v4.app.ActivityCompat.requestPermissions;
 
 public class DemoCamService extends HiddenCameraService {
 
+    private String TAG = "CameraService";
+
     @Nullable
     @Override
 //    资料地址http://blog.csdn.net/xiaanming/article/details/9750689/

@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Environment;
 import android.util.Log;
 import android.app.Activity;
@@ -44,6 +46,9 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
     private OutputStream outputStream;
     private FileWriter fileWriter;
 
+    private LocationManager myLocationManager;
+//    protected GpsLocation myGpsLocation = new GpsLocation(myLocationManager);
+    protected GpsLocation myGpsLocation;
 //    private start_photo mStartPhoto = new start_photo();
 //    private boolean fileNameSet;
 
@@ -90,18 +95,39 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         cuShakingData.setTimeStamp(0);
     }
 
+    public SensorGlobalWriter(Context context){
+        this.myLocationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        this.myGpsLocation = new GpsLocation(myLocationManager);
+        myGpsLocation.setShakingData(cuShakingData);
+        myGpsLocation.setMyContext(context);
+        myGpsLocation.isOpenGps();
+        myGpsLocation.formListenerGetLocation();
+        myGpsLocation.getGpsStatus();
+        myGpsLocation.getStatusListener();
+
+        cuShakingData.setLinearAccData(null);
+        cuShakingData.setGyrData(null);
+        cuShakingData.setDt(0);
+        cuShakingData.setIndex(0);
+        cuShakingData.setTimeStamp(0);
+
+    }
+
     public void startDetection() {
         stop = false;
         new Thread(new Runnable() {
+
                 //            匿名内部类
                 @Override
                 public void run() {
+
 //                try {
 //                    Thread.sleep(1000);
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
                     while (!stop) {
+//                        这里添加getSatelliteInfo为空时不执行
                         if (cuShakingData.getLinearAccData() == null) continue;
 //                    Log.d(TAG,"dection");
 //                    cuShakingData.transform();
@@ -115,7 +141,13 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
 
                             Thread.sleep(PublicConstants.SENSOPR_PERIOD);
 //                        一个传感器周期获取一次数据
-                            String info = cuShakingData.getCSV();
+                            StringBuffer info = new StringBuffer();
+                            info.append(cuShakingData.getCSV());
+                            /*if (myGpsLocation != null) {
+                                info.append(",gpsInfo" + myGpsLocation.getSatelliteInfo());
+                                info.append(",gpsNum," + myGpsLocation.getSatellliteNum());
+                                Log.i(TAG,"this show myGpsLocation is not null");
+                            }*/
                             /*capture_time++;
                             if(capture_time > 3){
                                 if(mStartPhoto.PhotoTake == 0){
@@ -127,8 +159,9 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
                                 capture_time = 0;
                             }*/
 //                        传感器不停变动，但是获取数据是一个传感器周期内获取一次
-                            Log.d(TAG, info);
-                            if(fileWriter != null)  fileWriter.write(info);
+
+                            Log.d(TAG, info.toString());
+                            if(fileWriter != null)  fileWriter.write(info.toString());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
@@ -177,6 +210,9 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         } else if(sensor.getType() == Sensor.TYPE_PRESSURE){
             cuShakingData.setPressureData(event.values[0]);
         }
+//        cuShakingData.setSatelliteNum(this.myGpsLocation.getSatellliteNum());
+//        cuShakingData.setSatelliteInfo(this.myGpsLocation.getSatelliteInfo());
+
         cuShakingData.setOrienData();
     }
 
