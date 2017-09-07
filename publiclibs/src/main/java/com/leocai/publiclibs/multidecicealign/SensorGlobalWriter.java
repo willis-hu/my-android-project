@@ -99,10 +99,12 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         this.myLocationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
         this.myGpsLocation = new GpsLocation(myLocationManager);
         myGpsLocation.setShakingData(cuShakingData);
+//        这里完成SensorGlobalWriter和GpsLocation之间cushakingData的同步
         myGpsLocation.setMyContext(context);
         myGpsLocation.isOpenGps();
         myGpsLocation.formListenerGetLocation();
         myGpsLocation.getGpsStatus();
+//        这里实现获取gps数据
         myGpsLocation.getStatusListener();
 
         cuShakingData.setLinearAccData(null);
@@ -180,6 +182,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         try {
             stop = true;
             fileWriter.close();
+//            myGpsLocation.stop();
         } catch (IOException e) {
             e.printStackTrace();
         }

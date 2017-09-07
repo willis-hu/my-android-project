@@ -478,6 +478,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopService(new Intent(BleSyncActivity.this,DemoCamService.class));
         Log.d(TAG, "onDestroy");
         if (mySensorManager != null)
             mySensorManager.stop();

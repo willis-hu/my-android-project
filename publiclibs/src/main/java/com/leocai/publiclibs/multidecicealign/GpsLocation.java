@@ -12,14 +12,22 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.View;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import java.net.Socket;
 
 import com.leocai.publiclibs.ShakingData;
 /**
@@ -27,38 +35,45 @@ import com.leocai.publiclibs.ShakingData;
  */
 
 public class GpsLocation {
-    private  final String TAG = "GpsLocation";
+    private final String TAG = "GpsLocation";
 
     private StringBuffer satelliteInfo;
     private int satellliteNum;
 
     private Context myContext;
-    private  GpsLocation instance;
-    private  Activity myActivity;
-    private  LocationManager locationManager;
-    private  LocationListener locationListener;
+    private GpsLocation instance;
+    private Activity myActivity;
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+
+    private Socket msocket;
+    private PrintStream moutput;
+    private OutputStream outputStream = null;
+    private String ip;
+    private String data;
+    private boolean socketStatus = false;
+
 
     protected ShakingData cushakingData = new ShakingData();
 
-    public void setShakingData(ShakingData shakingData){
+    public void setShakingData(ShakingData shakingData) {
         this.cushakingData = shakingData;
     }
 
 
-    public void setMyContext(Context context){
+    public void setMyContext(Context context) {
         myContext = context;
     }
 
-    public GpsLocation(Context context){
+    public GpsLocation(Context context) {
         satelliteInfo = new StringBuffer();
 //        locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
     }
 
-    public GpsLocation(LocationManager thisLocationManager){
+    public GpsLocation(LocationManager thisLocationManager) {
         satelliteInfo = new StringBuffer();
         locationManager = thisLocationManager;
     }
-
 
 
     public void isOpenGps() {
@@ -142,12 +157,13 @@ public class GpsLocation {
         Log.i(TAG, "时间：" + location.getTime());
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
     public StringBuffer getStatusListener() {
         GpsStatus.Listener listener = new GpsStatus.Listener() {
             @Override
             public void onGpsStatusChanged(int event) {
                 satelliteInfo.setLength(0);
-                satellliteNum =0;
+                satellliteNum = 0;
                 if (event == GpsStatus.GPS_EVENT_FIRST_FIX) {
                     Log.i(TAG, "第一次定位");
                 } else if (event == GpsStatus.GPS_EVENT_SATELLITE_STATUS) {
@@ -168,10 +184,10 @@ public class GpsLocation {
                     while (it.hasNext() && count <= maxSatellites) {
                         count++;
                         GpsSatellite s = it.next();
-                        satelliteInfo.append(","+s.getSnr());
+                        satelliteInfo.append("," + s.getSnr());
 //                        这里显示具体的gps信息
                         getGpsStatelliteInfo(s);
-                        Log.i(TAG,satelliteInfo.toString());
+                        Log.i(TAG, satelliteInfo.toString());
 
                     }
                     satellliteNum = count;
@@ -187,11 +203,11 @@ public class GpsLocation {
                 }
             }
         };
-         locationManager.addGpsStatusListener(listener);
+        locationManager.addGpsStatusListener(listener);
         return satelliteInfo;
     }
 
-    public StringBuffer showSateliteInfo(){
+    public StringBuffer showSateliteInfo() {
         return satelliteInfo;
     }
 
@@ -205,21 +221,21 @@ public class GpsLocation {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            Log.i(TAG,"Line 179 permission denied");
+            Log.i(TAG, "Line 179 permission denied");
             return null;
         }
         GpsStatus gpsStatus = locationManager.getGpsStatus(null); // 取当前状态
         //获取默认最大卫星数
         int maxSatellites = gpsStatus.getMaxSatellites();
         //获取第一次定位时间（启动到第一次定位）
-        int costTime=gpsStatus.getTimeToFirstFix();
-        Log.i(TAG, "第一次定位时间:"+costTime);
+        int costTime = gpsStatus.getTimeToFirstFix();
+        Log.i(TAG, "第一次定位时间:" + costTime);
         //获取卫星
-        Iterable<GpsSatellite> iterable=gpsStatus.getSatellites();
+        Iterable<GpsSatellite> iterable = gpsStatus.getSatellites();
         //一般再次转换成Iterator
-        Iterator<GpsSatellite> itrator=iterable.iterator();
+        Iterator<GpsSatellite> itrator = iterable.iterator();
         int count = 0;
-        while (itrator.hasNext() && count <= maxSatellites){
+        while (itrator.hasNext() && count <= maxSatellites) {
             count++;
             GpsSatellite s = itrator.next();
             result.add(s);
@@ -227,30 +243,82 @@ public class GpsLocation {
         return result;
     }
 
-    public void getGpsStatelliteInfo(GpsSatellite gpssatellite){
+    public void getGpsStatelliteInfo(GpsSatellite gpssatellite) {
 
         //卫星的方位角，浮点型数据
-        Log.i(TAG, "卫星的方位角："+gpssatellite.getAzimuth());
+        Log.i(TAG, "卫星的方位角：" + gpssatellite.getAzimuth());
         //卫星的高度，浮点型数据
-        Log.i(TAG, "卫星的高度："+gpssatellite.getElevation());
+        Log.i(TAG, "卫星的高度：" + gpssatellite.getElevation());
         //卫星的伪随机噪声码，整形数据
-        Log.i(TAG, "卫星的伪随机噪声码："+gpssatellite.getPrn());
+        Log.i(TAG, "卫星的伪随机噪声码：" + gpssatellite.getPrn());
         //卫星的信噪比，浮点型数据
-        Log.i(TAG, "卫星的信噪比："+gpssatellite.getSnr());
+        Log.i(TAG, "卫星的信噪比：" + gpssatellite.getSnr());
         //卫星是否有年历表，布尔型数据
-        Log.i(TAG, "卫星是否有年历表："+gpssatellite.hasAlmanac());
+        Log.i(TAG, "卫星是否有年历表：" + gpssatellite.hasAlmanac());
         //卫星是否有星历表，布尔型数据
-        Log.i(TAG, "卫星是否有星历表："+gpssatellite.hasEphemeris());
+        Log.i(TAG, "卫星是否有星历表：" + gpssatellite.hasEphemeris());
         //卫星是否被用于近期的GPS修正计算
-        Log.i(TAG, "卫星是否被用于近期的GPS修正计算："+gpssatellite.hasAlmanac());
+        Log.i(TAG, "卫星是否被用于近期的GPS修正计算：" + gpssatellite.hasAlmanac());
     }
 
-    public StringBuffer getSatelliteInfo(){
+    public StringBuffer getSatelliteInfo() {
         return satelliteInfo;
     }
 
-    public int getSatellliteNum(){
+    public int getSatellliteNum() {
         return satellliteNum;
     }
 
+  /*  public void stop(){
+        locationManager = null;
+//        试一下通过locationManager置空，关闭gps数据监听
+    }
+
+    public void connect(View view) {
+        ip = "10.3.8.211";//这里设置服务器端ip地址
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                if (!socketStatus) {
+                    try {
+                        msocket = new Socket(ip, 8000);//尝试连接到服务器端
+                        if (msocket == null) {
+                        } else {
+                            socketStatus = true;
+                        }
+                        outputStream = msocket.getOutputStream();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        thread.start();
+
+    }
+
+    public void send(View view){
+        data = satelliteInfo.toString();
+        if (data == null){
+            Log.d(TAG,"卫星数据暂时为空");
+        }else {
+            data = data + '\0';
+        }
+
+        final Thread thread = new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                if (socketStatus){
+                    try{
+                        outputStream.write(data.getBytes());
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        thread.start();
+    }*/
 }
