@@ -132,6 +132,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         findViewById(R.id.btn_start).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                final Handler handler = new Handler();
                 switch (currentState){
                     case STOPPED:
                         String fileName = etFileName.getText().toString();
@@ -165,15 +166,18 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
 //                        在这里添加拍照控制逻辑，试一下
 //                        使用handler来控制循环执行，2000ms执行一次，时间动态可调节。
-                        final Handler handler = new Handler();
-                        Runnable runnable = new Runnable() {
+//                        final Handler handler = new Handler();
+                        final Intent intent = new Intent(BleSyncActivity.this,DemoCamService.class);
+                        /*Runnable runnable = new Runnable() {
                             @Override
                             public void run() {
-                                startService(new Intent(BleSyncActivity.this,DemoCamService.class));
+                                startService(intent);
+//                                stopService(intent);//如果在完成一次拍照之后就关闭拍照，试一下
                                 handler.postDelayed(this,5000);
                             }
                         };
-                        handler.postDelayed(runnable,5000);
+                        handler.postDelayed(runnable,5000);*/
+                        startService(intent);
 
                         ((Button) v).setText("STOP");
                         currentState = STARTING;

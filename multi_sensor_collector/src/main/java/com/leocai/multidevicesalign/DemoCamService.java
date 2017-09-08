@@ -30,6 +30,8 @@ import static android.support.v4.app.ActivityCompat.requestPermissions;
 public class DemoCamService extends HiddenCameraService {
 
     private String TAG = "CameraService";
+    final Handler handler = new Handler();
+
 
     @Nullable
     @Override
@@ -51,9 +53,7 @@ public class DemoCamService extends HiddenCameraService {
         }
     }
 
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    private void takePictureLooper() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
@@ -66,24 +66,15 @@ public class DemoCamService extends HiddenCameraService {
 
                 startCamera(cameraConfig);
 
-                new android.os.Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        takePicture();
-                    }
-                }, 1000);
-                /*final Handler handler = new Handler();
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
                         takePicture();
-                        handler.postDelayed(this,2000);
+                        Log.i(TAG,"we have take a picture");
+                        handler.postDelayed(this,5000);
                     }
                 };
-
-
-                handler.postDelayed(runnable,2000);*/
-//                takePicture();
+                handler.postDelayed(runnable,5000);
             } else {
 
                 //Open settings to grant permission for "Draw other apps".
@@ -93,11 +84,59 @@ public class DemoCamService extends HiddenCameraService {
             //TODO Ask your parent activity for providing runtime permission
             Toast.makeText(this, "Camera permission not available", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        /*if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+
+            if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
+                CameraConfig cameraConfig = new CameraConfig()
+                        .getBuilder(this)
+                        .setCameraFacing(CameraFacing.REAR_FACING_CAMERA)
+                        .setCameraResolution(CameraResolution.MEDIUM_RESOLUTION)
+                        .setImageFormat(CameraImageFormat.FORMAT_JPEG)
+                        .build();
+
+                startCamera(cameraConfig);*/
+//                takePicture();
+
+                /*new android.os.Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        takePicture();
+                        Log.i(TAG,"WE HAVE TAKE A PICTURE");
+                    }
+                }, 1000);*/
+//                final Handler handler = new Handler();
+                /*Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        takePictureLooper();
+                        Log.i(TAG,"we have take a picture");
+                        handler.postDelayed(this,5000);
+                    }
+                };
+
+
+                handler.postDelayed(runnable,5000);*/
+                takePictureLooper();
+//                takePicture();
+            /*} else {
+
+                //Open settings to grant permission for "Draw other apps".
+                HiddenCameraUtils.openDrawOverPermissionSetting(this);
+            }
+        } else {
+            //TODO Ask your parent activity for providing runtime permission
+            Toast.makeText(this, "Camera permission not available", Toast.LENGTH_SHORT).show();
+        }*/
         return START_NOT_STICKY;
     }
 
 //    对外提供的拍照方法
-    public void takePciture() {
+    public void ontakePicture() {
         takePicture();
     }
 
