@@ -38,9 +38,10 @@
         android:layout_height="wrap_content"
         android:text="Start"
         android:id="@+id/btn_start"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:textSize="50sp" />
+        android:textSize="50sp"
+        android:layout_marginTop="123dp"
+        android:layout_below="@+id/tv_log"
+        android:layout_centerHorizontal="true" />
 
     <Switch
         android:layout_width="wrap_content"
@@ -79,8 +80,17 @@
         android:id="@+id/edt_sensor_frequency"
         android:hint="Sensor Frequency (HZ) (default 50HZ)"
         android:gravity="center"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/edt_masterAddress"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/edt_camera_frequency"
+        android:hint="Camera Frequency(ms)"
+        android:gravity="center"
+        android:layout_below="@+id/edt_sensor_frequency"
+        android:layout_alignParentStart="true" />
 
 
 

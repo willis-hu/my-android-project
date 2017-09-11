@@ -50,7 +50,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     private static final String TAG = "BleSyncActivity";
     private static final String PREF_ADDRESS_KEY = "master_address";
     private static final String PREFS_NAME = "pref";
-    private static final String PREF_FREQUNCY_KEY = "frequncy";
+    private static final String PREF_FREQUNCY_KEY = "frequency";
+    private static final String CAMERA_FREQUENCY_KEY = "camera_frequency";
     private static final String PREF_FILENAME_KEY = "filename";
     private static final String PREF_CSV_SWITCH_KEY = "csvswitch";
 
@@ -74,9 +75,11 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     EditText etFileName;
     EditText edt_masterAddress;
     EditText edt_frequency;
+    EditText edt_camera_frequency;
     private String fileName;
     private String masterAddress;
     private int frequency;
+    private int camera_frequency;
 
 //    这里更改了下初始化方法
     private SensorGlobalWriter csvWriter;
@@ -85,7 +88,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
     private HiddenCameraFragment mHiddenCameraFragment;
 
-    private int countNum = 1000;
+    private int countNum = 0;
 
     Intent intent;
     Handler handler;
@@ -106,6 +109,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         etFileName = (EditText) findViewById(R.id.et_filename);
         edt_masterAddress = (EditText) findViewById(R.id.edt_masterAddress);
         edt_frequency = (EditText) findViewById(R.id.edt_sensor_frequency);
+        edt_camera_frequency = (EditText)findViewById(R.id.edt_camera_frequency);
         writeCSVSwitch = (Switch) findViewById(R.id.switch_writecsv);
         init();
 //        这是在开始运行时拍一次照片
@@ -117,8 +121,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
             @Override
             public void run() {
                 startService(intent);
-                Log.i(TAG,"runnable executed:Thread number is" + countNum--);
-                handler.postDelayed(this,5000);
+                Log.i("CameraService","we have take picture : " + countNum++);
+                handler.postDelayed(this,camera_frequency);
             }
         };
         runRemove = new Runnable() {
@@ -143,6 +147,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         edt_masterAddress.setText(masterAddress);
         frequency = readFrequncy();
         edt_frequency.setText(frequency+"");
+        camera_frequency = readCameraFrequency();
+        edt_camera_frequency.setText(camera_frequency+"");
         etFileName.setText(readFileName());
         etFileName.setEnabled(true);
         btnStart.setText("START");
@@ -173,6 +179,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         saveFileName(fileName);
                         saveMasterAddress(masterAddress);
                         saveFrequncy(frequency);
+                        saveCameraFrequency(camera_frequency);
                         saveCSVSwitch(writeCSVSwitch.isChecked());
                         mySensorManager = new MySensorManager(BleSyncActivity.this);
                         /*if(writeCSVSwitch.isChecked()){
@@ -190,11 +197,14 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         mySensorManager.startSensor();
                         mySensorManager.startDetection();
 
-                        handler.postDelayed(runnable,5000);
+                        handler.postDelayed(runnable,frequency);
 
                         ((Button) v).setText("STOP");
                         currentState = STARTING;
                         etFileName.setEnabled(false);
+                        edt_masterAddress.setEnabled(false);
+                        edt_frequency.setEnabled(false);
+                        edt_camera_frequency.setEnabled(false);
                         showLog("Sensor Listener Running");
                         break;
                     case STARTING:
@@ -205,6 +215,9 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         stopService(intent);
                         ((Button) v).setText("START");
                         etFileName.setEnabled(true);
+                        edt_masterAddress.setEnabled(true);
+                        edt_frequency.setEnabled(true);
+                        edt_camera_frequency.setEnabled(true);
                         showLog("Sensor Listener Stopped");
                 }
             }
@@ -435,6 +448,18 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     private int readFrequncy() {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         return settings.getInt(PREF_FREQUNCY_KEY, 50);
+    }
+
+    private void saveCameraFrequency(int camera_frequency){
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME,0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(CAMERA_FREQUENCY_KEY,camera_frequency);
+        editor.apply();
+    }
+
+    private int readCameraFrequency(){
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME,0);
+        return settings.getInt(CAMERA_FREQUENCY_KEY,5000);
     }
 
     private void saveCSVSwitch(boolean sw) {
