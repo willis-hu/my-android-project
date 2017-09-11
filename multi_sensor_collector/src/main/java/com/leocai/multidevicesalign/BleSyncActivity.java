@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -84,6 +85,13 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
     private HiddenCameraFragment mHiddenCameraFragment;
 
+    private int countNum = 1000;
+
+    Intent intent;
+    Handler handler;
+    Runnable runnable;
+    Runnable runRemove;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +110,24 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         init();
 //        这是在开始运行时拍一次照片
 //        startService(new Intent(BleSyncActivity.this,DemoCamService.class));
+
+        intent = new Intent(BleSyncActivity.this,DemoCamService.class);
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                startService(intent);
+                Log.i(TAG,"runnable executed:Thread number is" + countNum--);
+                handler.postDelayed(this,5000);
+            }
+        };
+        runRemove = new Runnable() {
+            @Override
+            public void run() {
+                Log.i(TAG,"runRemove executed");
+                handler.removeCallbacks(runnable);
+            }
+        };
     }
 
     public void init(){
@@ -132,6 +158,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         findViewById(R.id.btn_start).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+
                 switch (currentState){
                     case STOPPED:
                         String fileName = etFileName.getText().toString();
@@ -165,14 +192,14 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
 //                        在这里添加拍照控制逻辑，试一下
 //                        使用handler来控制循环执行，2000ms执行一次，时间动态可调节。
-                        final Handler handler = new Handler();
-                        Runnable runnable = new Runnable() {
+//                        final Handler handler = new Handler();
+                        /*final Runnable runnable = new Runnable() {
                             @Override
                             public void run() {
-                                startService(new Intent(BleSyncActivity.this,DemoCamService.class));
+                                startService(intent);
                                 handler.postDelayed(this,5000);
                             }
-                        };
+                        };*/
                         handler.postDelayed(runnable,5000);
 
                         ((Button) v).setText("STOP");
@@ -183,8 +210,9 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                     case STARTING:
                         mySensorManager.stop();
                         currentState = STOPPED;
-//                        handler.removeCallbacks(runnable);
-                        stopService(new Intent(BleSyncActivity.this,DemoCamService.class));
+                        handler.postDelayed(runRemove,1000);
+
+                        stopService(intent);
                         ((Button) v).setText("START");
                         etFileName.setEnabled(true);
                         showLog("Sensor Listener Stopped");

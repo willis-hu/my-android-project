@@ -30,7 +30,7 @@ import static android.support.v4.app.ActivityCompat.requestPermissions;
 public class DemoCamService extends HiddenCameraService {
 
     private String TAG = "CameraService";
-
+//    private static final String TAG = "BleSyncActivity";
     @Nullable
     @Override
 //    资料地址http://blog.csdn.net/xiaanming/article/details/9750689/
@@ -54,6 +54,7 @@ public class DemoCamService extends HiddenCameraService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG,"onStartCommand executed");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
@@ -72,18 +73,6 @@ public class DemoCamService extends HiddenCameraService {
                         takePicture();
                     }
                 }, 1000);
-                /*final Handler handler = new Handler();
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        takePicture();
-                        handler.postDelayed(this,2000);
-                    }
-                };
-
-
-                handler.postDelayed(runnable,2000);*/
-//                takePicture();
             } else {
 
                 //Open settings to grant permission for "Draw other apps".
@@ -141,6 +130,13 @@ public class DemoCamService extends HiddenCameraService {
         }
 
         stopSelf();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopCamera();
+        Log.i(TAG,"onDestroy executed");
     }
 }
 
