@@ -182,7 +182,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         try {
             stop = true;
             fileWriter.close();
-//            myGpsLocation.stop();
+            myGpsLocation.stopListener();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -53,6 +53,8 @@ public class GpsLocation {
     private String data;
     private boolean socketStatus = false;
 
+    private GpsStatus.Listener listener;
+
 
     protected ShakingData cushakingData = new ShakingData();
 
@@ -159,9 +161,10 @@ public class GpsLocation {
 
     @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
     public StringBuffer getStatusListener() {
-        GpsStatus.Listener listener = new GpsStatus.Listener() {
+        listener = new GpsStatus.Listener() {
             @Override
             public void onGpsStatusChanged(int event) {
+                Log.i("debug","this is getStatusListener");
                 satelliteInfo.setLength(0);
                 satellliteNum = 0;
                 if (event == GpsStatus.GPS_EVENT_FIRST_FIX) {
@@ -269,12 +272,13 @@ public class GpsLocation {
         return satellliteNum;
     }
 
-  /*  public void stop(){
-        locationManager = null;
+    public void stopListener(){
+        locationManager.removeUpdates(locationListener);
+        locationManager.removeGpsStatusListener(listener);
 //        试一下通过locationManager置空，关闭gps数据监听
     }
 
-    public void connect(View view) {
+    /*public void connect(View view) {
         ip = "10.3.8.211";//这里设置服务器端ip地址
         Thread thread = new Thread() {
             @Override
