@@ -190,16 +190,6 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         mySensorManager.startSensor();
                         mySensorManager.startDetection();
 
-//                        在这里添加拍照控制逻辑，试一下
-//                        使用handler来控制循环执行，2000ms执行一次，时间动态可调节。
-//                        final Handler handler = new Handler();
-                        /*final Runnable runnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                startService(intent);
-                                handler.postDelayed(this,5000);
-                            }
-                        };*/
                         handler.postDelayed(runnable,5000);
 
                         ((Button) v).setText("STOP");
