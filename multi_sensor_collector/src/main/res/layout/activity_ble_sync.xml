@@ -38,10 +38,19 @@
         android:layout_height="wrap_content"
         android:text="Start"
         android:id="@+id/btn_start"
-        android:textSize="50sp"
+        android:textSize="30sp"
+        android:layout_alignBottom="@+id/btn_connect"
+        android:layout_alignEnd="@+id/switch_writecsv"
+        android:layout_alignTop="@+id/btn_connect" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="connect"
+        android:id="@+id/btn_connect"
+        android:textSize="30sp"
         android:layout_marginTop="123dp"
-        android:layout_below="@+id/tv_log"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/tv_log" />
 
     <Switch
         android:layout_width="wrap_content"

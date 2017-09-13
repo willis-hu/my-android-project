@@ -23,6 +23,7 @@ import com.leocai.publiclibs.ConnectedCallBack;
 import com.leocai.publiclibs.connection.BleServer;
 import com.leocai.publiclibs.multidecicealign.BleClient;
 import com.leocai.publiclibs.multidecicealign.FileInitCallBack;
+import com.leocai.publiclibs.multidecicealign.MessageSend;
 import com.leocai.publiclibs.multidecicealign.MySensorManager;
 import com.leocai.publiclibs.multidecicealign.SensorGlobalWriter;
 import com.leocai.publiclibs.multidecicealign.SensorSokectWriter;
@@ -71,6 +72,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 //    Button btnMaster;
 //    Button btnClient;
     Button btnStart;
+    Button btnConnect;
 
     EditText etFileName;
     EditText edt_masterAddress;
@@ -80,6 +82,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     private String masterAddress;
     private int frequency;
     private int camera_frequency;
+    private int countNum = 0;
 
 //    这里更改了下初始化方法
     private SensorGlobalWriter csvWriter;
@@ -88,12 +91,16 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
     private HiddenCameraFragment mHiddenCameraFragment;
 
-    private int countNum = 0;
+    private MessageGet messageGet;
+    private boolean connected;
 
     Intent intent;
     Handler handler;
     Runnable runnable;
     Runnable runRemove;
+
+    Handler handler_connect;
+    Runnable runConnect;//用来监控服务器端发送的消息
 
 
     @Override
@@ -106,14 +113,35 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 //        btnMaster = (Button) findViewById(R.id.btn_master);
 //        btnClient = (Button) findViewById(R.id.btn_client);
         btnStart = (Button) findViewById(R.id.btn_start);
+        btnConnect = (Button) findViewById(R.id.btn_connect);
         etFileName = (EditText) findViewById(R.id.et_filename);
         edt_masterAddress = (EditText) findViewById(R.id.edt_masterAddress);
         edt_frequency = (EditText) findViewById(R.id.edt_sensor_frequency);
         edt_camera_frequency = (EditText)findViewById(R.id.edt_camera_frequency);
         writeCSVSwitch = (Switch) findViewById(R.id.switch_writecsv);
         init();
-//        这是在开始运行时拍一次照片
-//        startService(new Intent(BleSyncActivity.this,DemoCamService.class));
+
+//        一直监控连接状态，如果连接的话监控receive的结果，有返回结果是模拟点击start
+        handler_connect = new Handler();
+        runConnect = new Runnable() {
+            @Override
+            public void run(){
+                if(connected) {
+                    try {
+                        if (messageGet.receive()) btnStart.performClick();
+                        else {
+                            btnStart.performClick();
+                            btnConnect.setEnabled(true);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                handler_connect.postDelayed(runConnect, 5000);
+            }
+        };
+        handler_connect.postDelayed(runConnect,5000);
+
 
         intent = new Intent(BleSyncActivity.this,DemoCamService.class);
         handler = new Handler();
@@ -141,7 +169,11 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         btnStart.setEnabled(true);
 //        masterBtnAction();
 //        clientBtnAction();
+        connectBtnAction();
         startBtnAction();
+
+
+
 //        利用sharedpreference存储文件名、频率、目的地址等信息，利用read**设置默认频率、文件名等
         masterAddress = readMasterAddress();
         edt_masterAddress.setText(masterAddress);
@@ -221,6 +253,20 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         edt_frequency.setEnabled(true);
                         edt_camera_frequency.setEnabled(true);
                         showLog("Sensor Listener Stopped");
+                }
+            }
+        });
+    }
+
+    private void connectBtnAction(){
+        messageGet = new MessageGet();
+        findViewById(R.id.btn_connect).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                connected = messageGet.connect(masterAddress);
+                if (connected){
+                    btnConnect.setEnabled(false);
+                    tv_log.setText("Connected");
                 }
             }
         });
@@ -524,6 +570,12 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     protected void onDestroy() {
         super.onDestroy();
         stopService(new Intent(BleSyncActivity.this,DemoCamService.class));
+        handler_connect.removeCallbacks(runConnect);
+        try {
+            messageGet.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Log.d(TAG, "onDestroy");
         if (mySensorManager != null)
             mySensorManager.stop();
