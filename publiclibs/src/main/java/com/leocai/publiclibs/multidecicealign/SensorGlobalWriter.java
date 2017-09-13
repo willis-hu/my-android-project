@@ -51,6 +51,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
     protected GpsLocation myGpsLocation;
 //    private start_photo mStartPhoto = new start_photo();
 //    private boolean fileNameSet;
+    private String masterAdress;
 
 //    新建文件，将文件头和缓冲带的数据写入到文件中
     public SensorGlobalWriter(String fileName) {
@@ -238,6 +239,11 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
 
     public void setStop(boolean stop) {
         this.stop = stop;
+    }
+
+    public void setMasterAdress(String masterAdress){
+        this.masterAdress = masterAdress;
+        myGpsLocation.setMasterAdress(masterAdress);
     }
 
 

@@ -55,6 +55,7 @@ public class GpsLocation {
 
     private MessageSend messageSend = new MessageSend();
     private boolean socketConnect = false;
+    private String masterAdress;
 
     public void setShakingData(ShakingData shakingData) {
         this.cushakingData = shakingData;
@@ -198,7 +199,7 @@ public class GpsLocation {
                         satelliteInfo.append(",total "+ satellliteNum +",average is "+Double.toString(noiseSignal/satellliteNum));
                     }
 
-                    socketConnect = messageSend.connect();
+                    socketConnect = messageSend.connect(masterAdress);
                     if (socketConnect){
                         messageSend.send(satelliteInfo);
                     }//用于发送gps数据到服务器端
@@ -290,6 +291,10 @@ public class GpsLocation {
             e.printStackTrace();
         }
 //        试一下通过locationManager置空，关闭gps数据监听
+    }
+
+    public void setMasterAdress(String masterAdress){
+        this.masterAdress = masterAdress;
     }
 
 

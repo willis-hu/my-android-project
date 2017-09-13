@@ -29,6 +29,7 @@ public class MySensorManager {
     SensorGlobalWriter sensorGlobalWriter;
 
     private int frequency;
+    private String masterAdress;
 
     public MySensorManager(Context context) {
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -88,6 +89,11 @@ public class MySensorManager {
      */
     public void setFileName(String fileName) throws IOException {
         sensorGlobalWriter.setFileName(fileName);
+    }
+
+    public void setMasterAdress(String masterAdress){
+        this.masterAdress = masterAdress;
+        sensorGlobalWriter.setMasterAdress(masterAdress);
     }
 
     public void addObserver(Observer observer) {

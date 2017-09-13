@@ -193,7 +193,9 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                             e.printStackTrace();
                             Log.d("mySensorManager","a mistake using mysensorManager");
                         }
+
                         mySensorManager.setFrequency(frequency);
+                        mySensorManager.setMasterAdress(masterAddress);
                         mySensorManager.startSensor();
                         mySensorManager.startDetection();
 

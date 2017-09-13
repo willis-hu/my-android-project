@@ -24,8 +24,9 @@ public class MessageSend {
 
 
 
-    public boolean connect() {
-        ip = "10.103.246.66";//这里设置服务器端ip地址
+    public boolean connect(String masterAdress) {
+//        ip = "10.103.246.66";//这里设置服务器端ip地址
+        ip = masterAdress;
         Thread thread = new Thread() {
             @Override
             public void run() {
