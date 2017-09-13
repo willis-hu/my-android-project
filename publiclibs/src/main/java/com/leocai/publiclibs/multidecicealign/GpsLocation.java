@@ -37,26 +37,24 @@ import com.leocai.publiclibs.ShakingData;
 public class GpsLocation {
     private final String TAG = "GpsLocation";
 
+//    需要发送的数据
     private StringBuffer satelliteInfo;
     private int satellliteNum;
+    private double noiseSignal;
 
+//    与定位相关的变量
     private Context myContext;
     private GpsLocation instance;
     private Activity myActivity;
     private LocationManager locationManager;
     private LocationListener locationListener;
-
-    private Socket msocket;
-    private PrintStream moutput;
-    private OutputStream outputStream = null;
-    private String ip;
-    private String data;
-    private boolean socketStatus = false;
-
     private GpsStatus.Listener listener;
 
 
     protected ShakingData cushakingData = new ShakingData();
+
+    private MessageSend messageSend = new MessageSend();
+    private boolean socketConnect = false;
 
     public void setShakingData(ShakingData shakingData) {
         this.cushakingData = shakingData;
@@ -166,6 +164,7 @@ public class GpsLocation {
             public void onGpsStatusChanged(int event) {
                 Log.i("debug","this is getStatusListener");
                 satelliteInfo.setLength(0);
+                noiseSignal = (double) 0;
                 satellliteNum = 0;
                 if (event == GpsStatus.GPS_EVENT_FIRST_FIX) {
                     Log.i(TAG, "第一次定位");
@@ -188,15 +187,25 @@ public class GpsLocation {
                         count++;
                         GpsSatellite s = it.next();
                         satelliteInfo.append("," + s.getSnr());
+                        noiseSignal += Double.valueOf(s.getSnr());
 //                        这里显示具体的gps信息
                         getGpsStatelliteInfo(s);
                         Log.i(TAG, satelliteInfo.toString());
 
                     }
                     satellliteNum = count;
+                    if (satellliteNum != 0){
+                        satelliteInfo.append(",total "+ satellliteNum +",average is "+Double.toString(noiseSignal/satellliteNum));
+                    }
 
+                    socketConnect = messageSend.connect();
+                    if (socketConnect){
+                        messageSend.send(satelliteInfo);
+                    }//用于发送gps数据到服务器端
                     cushakingData.setSatelliteInfo(satelliteInfo);
                     cushakingData.setSatelliteNum(satellliteNum);
+
+
 
                     Log.i(TAG, "搜索到：" + count + "颗卫星");
                 } else if (event == GpsStatus.GPS_EVENT_STARTED) {
@@ -272,57 +281,16 @@ public class GpsLocation {
         return satellliteNum;
     }
 
-    public void stopListener(){
+    public void stopListener() throws IOException {
         locationManager.removeUpdates(locationListener);
         locationManager.removeGpsStatusListener(listener);
+        try {
+            messageSend.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
 //        试一下通过locationManager置空，关闭gps数据监听
     }
 
-    /*public void connect(View view) {
-        ip = "10.3.8.211";//这里设置服务器端ip地址
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                if (!socketStatus) {
-                    try {
-                        msocket = new Socket(ip, 8000);//尝试连接到服务器端
-                        if (msocket == null) {
-                        } else {
-                            socketStatus = true;
-                        }
-                        outputStream = msocket.getOutputStream();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-        thread.start();
 
-    }
-
-    public void send(View view){
-        data = satelliteInfo.toString();
-        if (data == null){
-            Log.d(TAG,"卫星数据暂时为空");
-        }else {
-            data = data + '\0';
-        }
-
-        final Thread thread = new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                if (socketStatus){
-                    try{
-                        outputStream.write(data.getBytes());
-                    }catch (IOException e){
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-        thread.start();
-    }*/
 }
