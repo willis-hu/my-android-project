@@ -122,25 +122,42 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         init();
 
 //        一直监控连接状态，如果连接的话监控receive的结果，有返回结果是模拟点击start
-        handler_connect = new Handler();
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                while (connected) {
+                    try {
+                        messageGet.receive();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            };
+        thread.start();
+
+        /*handler_connect = new Handler();
         runConnect = new Runnable() {
             @Override
             public void run(){
                 if(connected) {
                     try {
-                        if (messageGet.receive()) btnStart.performClick();
-                        else {
+                        Log.i("MessageGet","socket connected");
+                        *//*if (messageGet.receive()==true&&currentState==STOPPED) btnStart.performClick();
+                        else if(messageGet.receive()==false && currentState == STARTING){
                             btnStart.performClick();
                             btnConnect.setEnabled(true);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        }else {
+                            Log.i(TAG,"Wrong selection");
+                        }*//*
+                    }
                     }
                 }
-                handler_connect.postDelayed(runConnect, 5000);
+                handler_connect.postDelayed(runConnect, 10000);
             }
         };
-        handler_connect.postDelayed(runConnect,5000);
+        handler_connect.postDelayed(runConnect,10000);*/
 
 
         intent = new Intent(BleSyncActivity.this,DemoCamService.class);

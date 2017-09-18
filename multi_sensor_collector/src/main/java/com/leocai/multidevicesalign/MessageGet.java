@@ -25,7 +25,6 @@ public class MessageGet{
     private BufferedReader bufferedReader;
     private String ip;
     private String data;
-    private String response;
     private boolean socketStatus = false;
     private Handler handler;
     private boolean buttonStart;
@@ -55,6 +54,11 @@ public class MessageGet{
             }
         };
         thread.start();
+        try {
+            thread.sleep(1000);//保证连接完成，返回为true
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
         return socketStatus;
 
     }
@@ -85,6 +89,7 @@ public class MessageGet{
         thread.start();
     }
 
+//     从服务器端接收信息
     public boolean receive() throws IOException{
 
         Thread thread = new Thread(){
@@ -92,13 +97,17 @@ public class MessageGet{
             public void run() {
                 super.run();
                 try {
+                    String response = new String();
                     inputStream = msocket.getInputStream();
                     inputStreamReader = new InputStreamReader(inputStream);
                     bufferedReader = new BufferedReader(inputStreamReader);
                     response = bufferedReader.readLine();
-                    switch (response){
-                        case "0":buttonStart = false;break;//为0表示关闭监听
-                        case "1":buttonStart = true;break;//为1表示开启监听
+                    Log.i(TAG,"we received " +response);
+                    if (response == "start" && buttonStart == false){
+                        buttonStart = true;
+                    }else if (response == "start" && buttonStart == true){
+                        buttonStart = false;
+                    }else {
                     }
 
                 }catch (IOException e){
@@ -106,6 +115,12 @@ public class MessageGet{
                 }
             }
         };
+        thread.start();
+        try {
+            thread.sleep(1000);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
         return buttonStart;
     }
 
