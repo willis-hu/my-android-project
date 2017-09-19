@@ -36,6 +36,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -92,7 +96,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     private HiddenCameraFragment mHiddenCameraFragment;
 
     private MessageGet messageGet;
-    private boolean connected;
+    private boolean connected = false;
 
     Intent intent;
     Handler handler;
@@ -101,6 +105,15 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
     Handler handler_connect;
     Runnable runConnect;//用来监控服务器端发送的消息
+
+    private Socket msocket;
+    private OutputStream outputStream = null;
+    private InputStream inputStream = null;
+    private InputStreamReader inputStreamReader;
+    private BufferedReader bufferedReader;
+    private char[] data = new char[5];
+    private boolean startSensor = false;
+
 
 
     @Override
@@ -122,12 +135,13 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         init();
 
 //        一直监控连接状态，如果连接的话监控receive的结果，有返回结果是模拟点击start
-        Thread thread = new Thread(){
+        /*Thread thread = new Thread(){
             @Override
             public void run() {
                 super.run();
                 while (connected) {
                     try {
+                        Log.i(TAG,"socket is still connected");
                         messageGet.receive();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -135,7 +149,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                 }
             }
             };
-        thread.start();
+        thread.start();*/
 
         /*handler_connect = new Handler();
         runConnect = new Runnable() {
@@ -216,7 +230,16 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
                 switch (currentState){
                     case STOPPED:
-                        String fileName = etFileName.getText().toString();
+                        String fileName = new String();
+                        if(connected){
+                            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd   HH:mm:ss");
+                            Date curDate = new Date(System.currentTimeMillis());
+                            fileName = formatter.format(curDate);
+                            etFileName.setText(fileName);
+                        }
+                        else {
+                            fileName = etFileName.getText().toString();
+                        }
 //                        看一下是不是文件名问题
                         Log.d(TAG,fileName);
                         masterAddress = edt_masterAddress.getText().toString();
@@ -276,17 +299,60 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     }
 
     private void connectBtnAction(){
-        messageGet = new MessageGet();
         findViewById(R.id.btn_connect).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                connected = messageGet.connect(masterAddress);
-                if (connected){
-                    btnConnect.setEnabled(false);
+                if (!connected){
+                    connect(masterAddress);
                     tv_log.setText("Connected");
+                    btnConnect.setText("Disconnect");
+                    final Thread thread = new Thread(){
+                        @Override
+                        public void run() {
+                            super.run();
+                            while (connected) {
+                                try {
+                                    data = new char[5];
+                                    Log.i(TAG,"socket is still connected");
+                                    bufferedReader.read(data);
+                                    Log.i(TAG,"we received " +String.valueOf(data));
+                                    if (String.valueOf(data).equals("start")){
+                                        startSensor = true;
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                btnStart.performClick();
+                                            }
+                                        });
+                                    }else {
+                                        Log.i(TAG,"something wrong received");
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    };
+                    thread.start();
                 }
-            }
-        });
+                else {
+                    try {
+                        msocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    connected = false;
+                    btnConnect.setText("Connect");
+                    tv_log.setText("Disconnected");
+                    try{
+                        inputStream.close();
+                        inputStreamReader.close();
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }
+                }
+            });
     }
 
 /*    private void startBtnAction() {
@@ -647,4 +713,38 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
             }
         });
     }
+
+    public void connect(final String masterAddress){
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                if (!connected) {
+                    try {
+                        msocket = new Socket(masterAddress, 8989);//尝试连接到服务器端
+                        if (msocket == null) {
+                            Log.i(TAG,"socket connect error");
+                        } else {
+                            Log.i(TAG,"socket is connected");
+                            connected = true;
+//                            连接成功后socket状态变为true
+                            inputStream = msocket.getInputStream();
+                            inputStreamReader = new InputStreamReader(inputStream,"utf-8");
+                            bufferedReader = new BufferedReader(inputStreamReader);
+                        }
+                        outputStream = msocket.getOutputStream();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        thread.start();
+        try {
+            thread.sleep(1000);//保证连接完成，返回为true
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -189,9 +189,9 @@ public class GpsLocation {
                         GpsSatellite s = it.next();
                         satelliteInfo.append("," + s.getSnr());
                         noiseSignal += Double.valueOf(s.getSnr());
-//                        这里显示具体的gps信息
-                        getGpsStatelliteInfo(s);
-                        Log.i(TAG, satelliteInfo.toString());
+//                        这里可以在log中显示具体的gps信息
+//                        getGpsStatelliteInfo(s);
+//                        Log.i(TAG, satelliteInfo.toString());
 
                     }
                     satellliteNum = count;
@@ -256,6 +256,7 @@ public class GpsLocation {
         return result;
     }
 
+//  调用此方法可以在log中显示具体的gps信息
     public void getGpsStatelliteInfo(GpsSatellite gpssatellite) {
 
         //卫星的方位角，浮点型数据

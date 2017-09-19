@@ -14,6 +14,7 @@ import java.security.PublicKey;
 
 /**
  * Created by HuQigen on 2017/9/13.
+ * 已经废弃，现在直接在blesync中添加连接操作
  */
 
 public class MessageGet{
@@ -91,8 +92,32 @@ public class MessageGet{
 
 //     从服务器端接收信息
     public boolean receive() throws IOException{
+        Runnable runnable =  new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String response = new String();
+                    inputStream = msocket.getInputStream();
+                    inputStreamReader = new InputStreamReader(inputStream);
+                    bufferedReader = new BufferedReader(inputStreamReader);
+                    response = bufferedReader.readLine();
+                    Log.i(TAG,"we received " +response);
+                    if (response == "start" && buttonStart == false){
+                        buttonStart = true;
+                    }else if (response == "start" && buttonStart == true){
+                        buttonStart = false;
+                    }else {
+                    }
 
-        Thread thread = new Thread(){
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+        };
+        Thread myThread = new Thread(runnable);
+        myThread.start();
+
+        /*Thread thread = new Thread(){
             @Override
             public void run() {
                 super.run();
@@ -120,7 +145,7 @@ public class MessageGet{
             thread.sleep(1000);
         }catch (InterruptedException e){
             e.printStackTrace();
-        }
+        }*/
         return buttonStart;
     }
 

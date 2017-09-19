@@ -514,7 +514,6 @@ public class ShakingData implements Serializable, Cloneable {
         info.append(satelliteInfo);
         info.append(",");
         info.append(satelliteNum);
-        if(satelliteNum != 0)   Log.i(TAG,"Satelllite num is not 0");
 
         info.append("\n");
 
