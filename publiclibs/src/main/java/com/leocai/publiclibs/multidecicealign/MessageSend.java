@@ -68,6 +68,7 @@ public class MessageSend {
                     try{
                         outputStream.write(data.getBytes("utf-8"));
                         outputStream.flush();
+//                        flush()完成数据发送
                         Log.i(TAG,"satelliteInfo has been sent");
                     }catch (IOException e){
                         e.printStackTrace();

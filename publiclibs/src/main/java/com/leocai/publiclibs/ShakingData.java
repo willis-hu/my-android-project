@@ -450,8 +450,8 @@ public class ShakingData implements Serializable, Cloneable {
 //        info.append(",");
         info.append("Timestamp");
         info.append(",");
-        info.append("dt");
-        info.append(",");
+/*        info.append("dt");
+        info.append(",");*/
         info.append("GpsInfo");
         info.append("\n");
         return info.toString();
@@ -500,8 +500,8 @@ public class ShakingData implements Serializable, Cloneable {
 //        info.append(",");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
         info.append(sdf.format(new Date(System.currentTimeMillis())));
-        info.append(",");
-        info.append(this.dt);
+/*        info.append(",");
+        info.append(this.dt);*/
         /*if (myGpsLocation != null) {
             info.append(",");
             info.append(myGpsLocation.getSatelliteInfo());
