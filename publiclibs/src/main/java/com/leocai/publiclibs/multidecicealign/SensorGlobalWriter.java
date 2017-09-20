@@ -72,7 +72,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         }
     }
 
-//    重新设置文件名？？不清楚这部分的功能
+//    设置文件名
     public void setFileName(String fileName) throws IOException {
         try {
 //            fileWriter = new FileWriter(new File(fileName));

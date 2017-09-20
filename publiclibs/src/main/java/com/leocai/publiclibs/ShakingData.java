@@ -72,6 +72,7 @@ public class ShakingData implements Serializable, Cloneable {
     private double[] magnetData;
     /**
      * 原始加速度
+     * x,y,z轴加速度
      */
     private double[] accData;
     /**

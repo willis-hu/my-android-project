@@ -61,47 +61,39 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     private static final String PREF_CSV_SWITCH_KEY = "csvswitch";
 
 
+//  变量表示startSensor是否开始。
+    private int currentState;
     private static final int STOPPED = 0;
     private static final int FILE_INITED = 1;
     private static final int STARTING = 2;
 
-    TextView tv_log;
-
-//    BleServer bleServer;   记录主从机器的连接状态
-//    BleClient bleClient;
+    private boolean connected = false;//记录无线连接状态
 
     MySensorManager mySensorManager;
-    private int currentState;
 
-//    Button btnMaster;
-//    Button btnClient;
     Button btnStart;
-    Button btnConnect;
-
+    Button btnConnect;//两个按钮用于连接服务器和开始采集
+    TextView tv_log;//用于显示当前状态
     EditText etFileName;
     EditText edt_masterAddress;
     EditText edt_frequency;
-    EditText edt_camera_frequency;
-    private String fileName;
+    EditText edt_camera_frequency;//采集数据需要的参数
     private String masterAddress;
     private int frequency;
     private int camera_frequency;
-    private int countNum = 0;
+    private int countNum = 0;//记录拍照次数，可以在log中看到。
 
-//    这里更改了下初始化方法
-    private SensorGlobalWriter csvWriter;
+
+/*    private SensorGlobalWriter csvWriter;
     private SensorSokectWriter socketWriter = new SensorSokectWriter();
+    已废弃
+    */
     private Switch writeCSVSwitch;
-
-    private HiddenCameraFragment mHiddenCameraFragment;
-
-    private MessageGet messageGet;
-    private boolean connected = false;
 
     Intent intent;
     Handler handler;
     Runnable runnable;
-    Runnable runRemove;
+    Runnable runRemove;//用于拍照控制
 
     Handler handler_connect;
     Runnable runConnect;//用来监控服务器端发送的消息
@@ -111,8 +103,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     private InputStream inputStream = null;
     private InputStreamReader inputStreamReader;
     private BufferedReader bufferedReader;
-    private char[] data = new char[5];
-    private boolean startSensor = false;
+    private char[] data = new char[5];//无线控制相关，data为缓冲区
 
 
 
@@ -120,11 +111,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ble_sync);
-//        csvWriter = new SensorGlobalWriter(this);
 
         tv_log = (TextView) findViewById(R.id.tv_log);
-//        btnMaster = (Button) findViewById(R.id.btn_master);
-//        btnClient = (Button) findViewById(R.id.btn_client);
         btnStart = (Button) findViewById(R.id.btn_start);
         btnConnect = (Button) findViewById(R.id.btn_connect);
         etFileName = (EditText) findViewById(R.id.et_filename);
@@ -133,46 +121,6 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         edt_camera_frequency = (EditText)findViewById(R.id.edt_camera_frequency);
         writeCSVSwitch = (Switch) findViewById(R.id.switch_writecsv);
         init();
-
-//        一直监控连接状态，如果连接的话监控receive的结果，有返回结果是模拟点击start
-        /*Thread thread = new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                while (connected) {
-                    try {
-                        Log.i(TAG,"socket is still connected");
-                        messageGet.receive();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            };
-        thread.start();*/
-
-        /*handler_connect = new Handler();
-        runConnect = new Runnable() {
-            @Override
-            public void run(){
-                if(connected) {
-                    try {
-                        Log.i("MessageGet","socket connected");
-                        *//*if (messageGet.receive()==true&&currentState==STOPPED) btnStart.performClick();
-                        else if(messageGet.receive()==false && currentState == STARTING){
-                            btnStart.performClick();
-                            btnConnect.setEnabled(true);
-                        }else {
-                            Log.i(TAG,"Wrong selection");
-                        }*//*
-                    }
-                    }
-                }
-                handler_connect.postDelayed(runConnect, 10000);
-            }
-        };
-        handler_connect.postDelayed(runConnect,10000);*/
-
 
         intent = new Intent(BleSyncActivity.this,DemoCamService.class);
         handler = new Handler();
@@ -188,6 +136,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
             @Override
             public void run() {
                 Log.i(TAG,"runRemove executed");
+                stopService(intent);
                 handler.removeCallbacks(runnable);
             }
         };
@@ -195,13 +144,11 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
     public void init(){
 //        进行界面的默认设置，读取手机文件，设置默认的显示内容
-//        btnMaster.setEnabled(true);
-//        btnClient.setEnabled(true);
         btnStart.setEnabled(true);
-//        masterBtnAction();
-//        clientBtnAction();
-        connectBtnAction();
-        startBtnAction();
+        btnConnect.setEnabled(true);
+
+        connectBtnAction();//连接服务器
+        startBtnAction();//开始采集
 
 
 
@@ -215,14 +162,13 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         etFileName.setText(readFileName());
         etFileName.setEnabled(true);
         btnStart.setText("START");
-//        测试一下获取的地址是什么
-//        tv_log.setText(Environment.getExternalStorageDirectory().toString());
+
         tv_log.setText("");
         currentState = STOPPED;
         writeCSVSwitch.setChecked(readCSVSwitch());
     }
 
-//    这一段是自己写的，试一下
+//  start按钮操作
     private void startBtnAction(){
         findViewById(R.id.btn_start).setOnClickListener(new View.OnClickListener(){
             @Override
@@ -232,7 +178,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                     case STOPPED:
                         String fileName = new String();
                         if(connected){
-                            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd   HH:mm:ss");
+//                            如果是已连接wifi状态，则获取当前时间来作为文件名
+                            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
                             Date curDate = new Date(System.currentTimeMillis());
                             fileName = formatter.format(curDate);
                             etFileName.setText(fileName);
@@ -240,7 +187,6 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         else {
                             fileName = etFileName.getText().toString();
                         }
-//                        看一下是不是文件名问题
                         Log.d(TAG,fileName);
                         masterAddress = edt_masterAddress.getText().toString();
                         frequency = Integer.parseInt(edt_frequency.getText().toString());
@@ -254,16 +200,11 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         saveCameraFrequency(camera_frequency);
                         saveCSVSwitch(writeCSVSwitch.isChecked());
                         mySensorManager = new MySensorManager(BleSyncActivity.this);
-                        /*if(writeCSVSwitch.isChecked()){
-                            mySensorManager.setGlobalWriter(csvWriter);
-                        }else {
-                            mySensorManager.setGlobalWriter(socketWriter);
-                        }*/
                         try {
                             mySensorManager.setFileName(fileName);
                         } catch (IOException e) {
                             e.printStackTrace();
-                            Log.d("mySensorManager","a mistake using mysensorManager");
+                            Log.d("mySensorManager","a mistake using mySensorManager");
                         }
 
                         mySensorManager.setFrequency(frequency);
@@ -271,7 +212,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         mySensorManager.startSensor();
                         mySensorManager.startDetection();
 
-                        handler.postDelayed(runnable,frequency);
+                        handler.postDelayed(runnable,camera_frequency);
 
                         ((Button) v).setText("STOP");
                         currentState = STARTING;
@@ -302,38 +243,41 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         findViewById(R.id.btn_connect).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                if (!connected){
-                    connect(masterAddress);
-                    tv_log.setText("Connected");
-                    btnConnect.setText("Disconnect");
-                    final Thread thread = new Thread(){
-                        @Override
-                        public void run() {
-                            super.run();
-                            while (connected) {
-                                try {
-                                    data = new char[5];
-                                    Log.i(TAG,"socket is still connected");
-                                    bufferedReader.read(data);
-                                    Log.i(TAG,"we received " +String.valueOf(data));
-                                    if (String.valueOf(data).equals("start")){
-                                        startSensor = true;
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                btnStart.performClick();
-                                            }
-                                        });
-                                    }else {
-                                        Log.i(TAG,"something wrong received");
+                if (!connected) {
+                    if (connect(masterAddress)) {
+                        tv_log.setText("Connected");
+                        btnConnect.setText("Disconnect");
+                        final Thread thread = new Thread() {
+                            @Override
+                            public void run() {
+                                super.run();
+                                while (connected) {
+                                    try {
+                                        data = new char[5];
+                                        Log.i(TAG, "socket is still connected");
+                                        bufferedReader.read(data);
+                                        Log.i(TAG, "we received " + String.valueOf(data));
+                                        if (String.valueOf(data).equals("start")) {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    btnStart.performClick();
+                                                }
+                                            });
+                                        } else {
+                                            Log.i(TAG, "something wrong received");
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
                                     }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
                                 }
                             }
-                        }
-                    };
-                    thread.start();
+                        };
+                        thread.start();
+                    }
+                    else{
+                        Toast.makeText(BleSyncActivity.this,"connect server error,",Toast.LENGTH_SHORT).show();
+                    }
                 }
                 else {
                     try {
@@ -355,169 +299,6 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
             });
     }
 
-/*    private void startBtnAction() {
-        findViewById(R.id.btn_start).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                if (bleServer == null) {
-//                    toastError("Not Connected Yet");
-//                    return;
-//                }
-                switch (currentState) {
-                    case STOPPED:
-                        String fileName = etFileName.getText().toString();
-                        if (fileName.equals("")) {
-                            toastError("Please input fileName first");
-                            return;
-                        }
-                        saveFileName(fileName);
-//                        bleServer.sendFileCommands(fileName);
-                        ((Button) v).setText("START");
-                        currentState = FILE_INITED;
-                        etFileName.setEnabled(false);
-                        break;
-                    case FILE_INITED:
-//                        bleServer.sendStartCommands();
-                        ((Button) v).setText("STOP");
-                        currentState = STARTING;
-                        break;
-                    case STARTING:
-//                        bleServer.sendStopCommands();
-                        ((Button) v).setText("Need Reset");
-                        ((Button) v).setEnabled(false);
-                        currentState = STOPPED;
-                        etFileName.setEnabled(true);
-                        break;
-                }
-
-                masterAddress = edt_masterAddress.getText().toString();
-                if(masterAddress == null || masterAddress.equals("")){
-                    toastError("Please input master address first");
-                    return;
-                }
-
-                saveMasterAddress(masterAddress);
-                showLog("Start Sensor Listener");
-                btnStart.setEnabled(false);
-                mySensorManager = new MySensorManager(BleSyncActivity.this);
-                if(writeCSVSwitch.isChecked()){
-                    mySensorManager.setGlobalWriter(csvWriter);
-                }else
-                    mySensorManager.setGlobalWriter(socketWriter);
-                saveCSVSwitch(writeCSVSwitch.isChecked());
-                frequency = Integer.parseInt(edt_frequency.getText().toString());
-                saveFrequncy(frequency);
-                以下两句是设置存储fileWriter对应的文件名，可能出错。
-                fileName = etFileName.getText().toString();
-                try {
-                    mySensorManager.setFileName(fileName);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*//*
-                mySensorManager.setFrequency(frequency);
-                mySensorManager.startSensor();
-                mySensorManager.startDetection();
-            }
-        });
-    }*/
-
-
-
-//    private void clientBtnAction() {
-//        findViewById(R.id.btn_client).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (!isBlutoothOpened()) {
-//                    toastError("Blutooth Not Open");
-//                    return;
-//                }
-//                masterAddress = edt_masterAddress.getText().toString();
-//                if (masterAddress == null || masterAddress.equals("")) {
-//                    toastError("Please input master address first");
-//                    return;
-//                }
-//                saveMasterAddress(masterAddress);
-//    存下主机地址
-//                showLog("Client");
-//                btnMaster.setEnabled(false);
-//                btnStart.setEnabled(false);
-//                btnClient.setEnabled(false);
-//    点击客户端后三个按钮均不可点击
-//                mySensorManager = new MySensorManager(BleSyncActivity.this);
-//                if(writeCSVSwitch.isChecked())
-//                    mySensorManager.setGlobalWriter(csvWriter);
-//                else
-//                    mySensorManager.setGlobalWriter(socketWriter);
-//    设置传感器数据存储方式，本地存储或者socket传输
-//                saveCSVSwitch(writeCSVSwitch.isChecked());
-//                frequency = Integer.parseInt(edt_frequency.getText().toString());
-//                saveFrequncy(frequency);
-//    设置传感器监听频率，注册传感器监听
-//                mySensorManager.setFrequency(frequency);
-//                mySensorManager.startSensor();
-//
-//                bleClient = new BleClient(masterAddress);
-//    应该是这里，在客户端点击client，创建一个蓝牙连接，然后连接到主机。
-//                bleClient.connect(new ConnectedCallBack() {
-//                    @Override
-//                    public void onConnected(InputStream in) {
-//                        showLog("Connected");
-//                    }
-//                }, new FileInitCallBack(){
-//                    @Override
-//    接受主机发送的初始化完成命令，之后锁定文件名输入功能
-//                    public void onFileReceived(InputStream in) {
-//                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-//                        try {
-//                            final String fileName = br.readLine();
-//                            mySensorManager.setFileName(fileName);
-//                            runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    etFileName.setText(fileName);
-//                                    etFileName.setEnabled(false);
-//                                }
-//                            });
-//                            showLog("FILE INITED");
-//                        } catch (IOException e) {
-//                            showLog(e.getMessage());
-//                        }
-//                    }
-//                }, new StartCallBack() {
-//                    @Override
-//                    public void onStart() {
-//                        showLog("STATING");
-//                        mySensorManager.startDetection();
-//                    }
-//                }, new StopCallBack() {
-//                    @Override
-//                    public void onStop() {
-//                        showLog("STOPPED");
-//                        mySensorManager.stop();
-//                    }
-//                });
-//            }
-//        });
-//    }
-
-//    private void masterBtnAction() {
-//        findViewById(R.id.btn_master).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (!isBlutoothOpened()) {
-//                    toastError("Blutooth Not Open");
-//                    return;
-//                }
-//
-//                showLog("Master");
-//                bleServer = new BleServer();
-//                bleServer.addObserver(BleSyncActivity.this);
-//                bleServer.listen();
-//                btnClient.setEnabled(false);
-//                btnMaster.setEnabled(false);
-//            }
-//        });
-//    }
 
     private void toastError(final String msg) {
         runOnUiThread(new Runnable() {
@@ -621,10 +402,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onStop() {
         super.onStop();
-//        if (mySensorManager != null)
-//            mySensorManager.stop();
         Log.d(TAG, "onStop");
-//        Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "onStop", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -654,15 +433,10 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         super.onDestroy();
         stopService(new Intent(BleSyncActivity.this,DemoCamService.class));
         handler_connect.removeCallbacks(runConnect);
-        try {
-            messageGet.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         Log.d(TAG, "onDestroy");
         if (mySensorManager != null)
             mySensorManager.stop();
-//        Toast.makeText(this, "onDestroy", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "onDestroy", Toast.LENGTH_SHORT).show();
 
     }
 
@@ -714,7 +488,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         });
     }
 
-    public void connect(final String masterAddress){
+    public boolean connect(final String masterAddress){
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -735,6 +509,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         outputStream = msocket.getOutputStream();
                     } catch (IOException e) {
                         e.printStackTrace();
+                        Log.i(TAG,"perhaps wrong with connecting");
                     }
                 }
             }
@@ -745,6 +520,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         }catch (InterruptedException e){
             e.printStackTrace();
         }
+        return connected;
     }
 
 }

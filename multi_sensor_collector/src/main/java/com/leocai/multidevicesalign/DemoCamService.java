@@ -39,20 +39,9 @@ public class DemoCamService extends HiddenCameraService {
     }
 
 
-    //  返回一个service对象，用于和activity交互信息
-    public class DemoCamBinder extends Binder {
-        /**
-         * 获取当前Service的实例
-         *
-         * @return
-         */
-        public DemoCamService getService() {
-            return DemoCamService.this;
-        }
-    }
-
 
     @Override
+//    启动service时调用，拍一张照片
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG,"onStartCommand executed");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -85,10 +74,6 @@ public class DemoCamService extends HiddenCameraService {
         return START_NOT_STICKY;
     }
 
-//    对外提供的拍照方法
-    public void takePciture() {
-        takePicture();
-    }
 
 
     @Override
@@ -98,7 +83,7 @@ public class DemoCamService extends HiddenCameraService {
         Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
         //Do something with the bitmap
 
-        Log.d("Image capture", imageFile.length() + "");
+        Log.d(TAG, "Image capture"+imageFile.length() + "");
         stopSelf();
     }
 
