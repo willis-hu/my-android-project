@@ -243,6 +243,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         findViewById(R.id.btn_connect).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                masterAddress = edt_masterAddress.getText().toString();
+                saveMasterAddress(masterAddress);
                 if (!connected) {
                     if (connect(masterAddress)) {
                         tv_log.setText("Connected");
