@@ -212,6 +212,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         mySensorManager.startSensor();
                         mySensorManager.startDetection();
 
+//                      开始调用拍照service
                         handler.postDelayed(runnable,camera_frequency);
 
                         ((Button) v).setText("STOP");
@@ -226,7 +227,6 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         mySensorManager.stop();
                         currentState = STOPPED;
                         handler.postDelayed(runRemove,1000);
-
                         stopService(intent);
                         ((Button) v).setText("START");
                         etFileName.setEnabled(true);
@@ -249,6 +249,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                     if (connect(masterAddress)) {
                         tv_log.setText("Connected");
                         btnConnect.setText("Disconnect");
+//                      创建线程监听服务器端是否有start消息
                         final Thread thread = new Thread() {
                             @Override
                             public void run() {
@@ -263,6 +264,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
+//                                                  接收到start消息，模拟点击start按钮
                                                     btnStart.performClick();
                                                 }
                                             });
