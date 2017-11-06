@@ -31,6 +31,7 @@ import com.leocai.publiclibs.multidecicealign.StartCallBack;
 import com.leocai.publiclibs.multidecicealign.StopCallBack;
 import com.androidhiddencamera.HiddenCameraFragment;
 import com.leocai.multidevicesalign.DemoCamService;
+import com.leocai.publiclibs.multidecicealign.MessageSend;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,6 +60,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     private static final String CAMERA_FREQUENCY_KEY = "camera_frequency";
     private static final String PREF_FILENAME_KEY = "filename";
     private static final String PREF_CSV_SWITCH_KEY = "csvswitch";
+    private final StringBuffer messageSend2Wifi = new StringBuffer("still connect");
 
 
 //  变量表示startSensor是否开始。
@@ -71,16 +73,17 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
     MySensorManager mySensorManager;
 
+
     Button btnStart;
     Button btnConnect;//两个按钮用于连接服务器和开始采集
     TextView tv_log;//用于显示当前状态
     EditText etFileName;
     EditText edt_masterAddress;
     EditText edt_frequency;
-    EditText edt_camera_frequency;//采集数据需要的参数
+//    EditText edt_camera_frequency;//采集数据需要的参数
     private String masterAddress;
     private int frequency;
-    private int camera_frequency;
+//    private int camera_frequency;
     private int countNum = 0;//记录拍照次数，可以在log中看到。
 
 
@@ -94,6 +97,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     Handler handler;
     Runnable runnable;
     Runnable runRemove;//用于拍照控制
+    Runnable keepWifiConnect;
 
     Handler handler_connect;
     Runnable runConnect;//用来监控服务器端发送的消息
@@ -118,7 +122,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         etFileName = (EditText) findViewById(R.id.et_filename);
         edt_masterAddress = (EditText) findViewById(R.id.edt_masterAddress);
         edt_frequency = (EditText) findViewById(R.id.edt_sensor_frequency);
-        edt_camera_frequency = (EditText)findViewById(R.id.edt_camera_frequency);
+//        edt_camera_frequency = (EditText)findViewById(R.id.edt_camera_frequency);
         writeCSVSwitch = (Switch) findViewById(R.id.switch_writecsv);
         init();
 
@@ -129,7 +133,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
             public void run() {
                 startService(intent);
                 Log.i("CameraService","we have take picture : " + countNum++);
-                handler.postDelayed(this,camera_frequency);
+//                handler.postDelayed(this,camera_frequency);
             }
         };
         runRemove = new Runnable() {
@@ -138,6 +142,13 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                 Log.i(TAG,"runRemove executed");
                 stopService(intent);
                 handler.removeCallbacks(runnable);
+            }
+        };
+        keepWifiConnect = new Runnable() {
+            @Override
+            public void run() {
+                send(messageSend2Wifi);
+                handler.postDelayed(this,2000);
             }
         };
     }
@@ -157,8 +168,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         edt_masterAddress.setText(masterAddress);
         frequency = readFrequncy();
         edt_frequency.setText(frequency+"");
-        camera_frequency = readCameraFrequency();
-        edt_camera_frequency.setText(camera_frequency+"");
+//        camera_frequency = readCameraFrequency();
+//        edt_camera_frequency.setText(camera_frequency+"");
         etFileName.setText(readFileName());
         etFileName.setEnabled(true);
         btnStart.setText("START");
@@ -183,6 +194,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                             Date curDate = new Date(System.currentTimeMillis());
                             fileName = formatter.format(curDate);
                             etFileName.setText(fileName);
+                            handler.removeCallbacks(keepWifiConnect);
                         }
                         else {
                             fileName = etFileName.getText().toString();
@@ -197,7 +209,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         saveFileName(fileName);
                         saveMasterAddress(masterAddress);
                         saveFrequncy(frequency);
-                        saveCameraFrequency(camera_frequency);
+//                        saveCameraFrequency(camera_frequency);
                         saveCSVSwitch(writeCSVSwitch.isChecked());
                         mySensorManager = new MySensorManager(BleSyncActivity.this);
                         try {
@@ -213,17 +225,20 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         mySensorManager.startDetection();
 
 //                      开始调用拍照service
-                        handler.postDelayed(runnable,camera_frequency);
+//                        handler.postDelayed(runnable,camera_frequency);
 
                         ((Button) v).setText("STOP");
                         currentState = STARTING;
                         etFileName.setEnabled(false);
                         edt_masterAddress.setEnabled(false);
                         edt_frequency.setEnabled(false);
-                        edt_camera_frequency.setEnabled(false);
+//                        edt_camera_frequency.setEnabled(false);
                         showLog("Sensor Listener Running");
                         break;
                     case STARTING:
+                        if(connected){
+                            handler.postDelayed(keepWifiConnect,2000);
+                        }
                         mySensorManager.stop();
                         currentState = STOPPED;
                         handler.postDelayed(runRemove,1000);
@@ -232,7 +247,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         etFileName.setEnabled(true);
                         edt_masterAddress.setEnabled(true);
                         edt_frequency.setEnabled(true);
-                        edt_camera_frequency.setEnabled(true);
+//                        edt_camera_frequency.setEnabled(true);
                         showLog("Sensor Listener Stopped");
                 }
             }
@@ -268,7 +283,10 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                                                     btnStart.performClick();
                                                 }
                                             });
-                                        } else {
+                                        }else if(String.valueOf(data).equals("shutt")){
+                                            handler.post(runnable);
+                                        }
+                                        else {
                                             Log.i(TAG, "something wrong received");
                                         }
                                     } catch (IOException e) {
@@ -282,6 +300,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                     else{
                         Toast.makeText(BleSyncActivity.this,"connect server error,",Toast.LENGTH_SHORT).show();
                     }
+                    handler.postDelayed(keepWifiConnect,2000);
                 }
                 else {
                     try {
@@ -298,6 +317,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                     }catch (IOException e){
                         e.printStackTrace();
                     }
+                    handler.removeCallbacks(keepWifiConnect);
                 }
                 }
             });
@@ -499,7 +519,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                 super.run();
                 if (!connected) {
                     try {
-                        msocket = new Socket(masterAddress, 8989);//尝试连接到服务器端
+                        msocket = new Socket(masterAddress, 5000);//尝试连接到服务器端
                         if (msocket == null) {
                             Log.i(TAG,"socket connect error");
                         } else {
@@ -525,6 +545,27 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
             e.printStackTrace();
         }
         return connected;
+    }
+
+    public void send(final StringBuffer satelliteInfo){
+
+        final Thread thread = new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                if (connected){
+                    try{
+                        outputStream.write(satelliteInfo.toString().getBytes("utf-8"));
+                        outputStream.flush();
+//                        flush()完成数据发送
+                        Log.i(TAG,"message has been sent");
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        thread.start();
     }
 
 }

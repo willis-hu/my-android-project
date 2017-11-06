@@ -33,7 +33,7 @@ public class MessageSend {
                 super.run();
                 if (!socketStatus) {
                     try {
-                        msocket = new Socket(ip, 8989);//尝试连接到服务器端
+                        msocket = new Socket(ip, 5000);//尝试连接到服务器端
                         if (msocket == null) {
                         } else {
                             Log.i(TAG,"socket is connected");
@@ -55,7 +55,7 @@ public class MessageSend {
     public void send(StringBuffer satelliteInfo){
         data = satelliteInfo.toString();
         if (data == null){
-            Log.d(TAG,"卫星数据暂时为空");
+            Log.d(TAG,"no data sent ");
         }else {
             data = data + '\n';
         }
@@ -69,7 +69,7 @@ public class MessageSend {
                         outputStream.write(data.getBytes("utf-8"));
                         outputStream.flush();
 //                        flush()完成数据发送
-                        Log.i(TAG,"satelliteInfo has been sent");
+                        Log.i(TAG,"message has been sent");
                     }catch (IOException e){
                         e.printStackTrace();
                     }
