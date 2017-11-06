@@ -81,8 +81,10 @@ public class MessageSend {
 
     public void close() throws IOException {
         try {
-            outputStream.close();
-            msocket.close();
+            if(outputStream!=null){
+                outputStream.close();
+                msocket.close();
+            }
             Log.i(TAG,"socket is closed");
         }catch (IOException e){
             e.printStackTrace();

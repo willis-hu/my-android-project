@@ -99,8 +99,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     Runnable runRemove;//用于拍照控制
     Runnable keepWifiConnect;
 
-    Handler handler_connect;
-    Runnable runConnect;//用来监控服务器端发送的消息
+//    Handler handler_connect;
+//    Runnable runConnect;//用来监控服务器端发送的消息
 
     private Socket msocket;
     private OutputStream outputStream = null;
@@ -455,8 +455,18 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        connected = false;
+        try {
+            msocket.close();
+            outputStream.close();
+            inputStream.close();
+            inputStreamReader.close();
+            bufferedReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         stopService(new Intent(BleSyncActivity.this,DemoCamService.class));
-        handler_connect.removeCallbacks(runConnect);
+//        handler_connect.removeCallbacks(runConnect);
         Log.d(TAG, "onDestroy");
         if (mySensorManager != null)
             mySensorManager.stop();

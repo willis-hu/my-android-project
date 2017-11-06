@@ -74,6 +74,7 @@ public class GpsLocation {
     public GpsLocation(LocationManager thisLocationManager) {
         satelliteInfo = new StringBuffer();
         locationManager = thisLocationManager;
+
     }
 
 
