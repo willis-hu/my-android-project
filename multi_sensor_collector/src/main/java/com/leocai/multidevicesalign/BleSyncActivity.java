@@ -147,6 +147,14 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         keepWifiConnect = new Runnable() {
             @Override
             public void run() {
+                /*if(msocket.isClosed()&&connected){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            btnConnect.performClick();
+                        }
+                    });
+                }*/
                 send(messageSend2Wifi);
                 handler.postDelayed(this,2000);
             }

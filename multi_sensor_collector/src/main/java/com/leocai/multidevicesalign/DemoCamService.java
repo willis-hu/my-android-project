@@ -21,6 +21,7 @@ import com.androidhiddencamera.HiddenCameraUtils;
 import com.androidhiddencamera.config.CameraFacing;
 import com.androidhiddencamera.config.CameraImageFormat;
 import com.androidhiddencamera.config.CameraResolution;
+import com.androidhiddencamera.config.CameraRotation;
 
 import java.io.File;
 
@@ -50,9 +51,11 @@ public class DemoCamService extends HiddenCameraService {
                 CameraConfig cameraConfig = new CameraConfig()
                         .getBuilder(this)
                         .setCameraFacing(CameraFacing.REAR_FACING_CAMERA)
-                        .setCameraResolution(CameraResolution.MEDIUM_RESOLUTION)
+                        .setCameraResolution(CameraResolution.LOW_RESOLUTION)
                         .setImageFormat(CameraImageFormat.FORMAT_JPEG)
+                        .setImageRotation(CameraRotation.ROTATION_90)
                         .build();
+//                设置拍照的前置、后置摄像头，分辨率，图片存储格式。
 
                 startCamera(cameraConfig);
 
@@ -79,7 +82,7 @@ public class DemoCamService extends HiddenCameraService {
     @Override
     public void onImageCapture(@NonNull File imageFile) {
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
         //Do something with the bitmap
 
