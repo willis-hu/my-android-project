@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/detection_unused" />
+            <option value="$PROJECT_DIR$/hiddencamera" />
             <option value="$PROJECT_DIR$/multi_sensor_collector" />
             <option value="$PROJECT_DIR$/publiclibs" />
             <option value="$PROJECT_DIR$/unsued1" />

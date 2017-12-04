@@ -53,6 +53,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
 //    private boolean fileNameSet;
     private String masterAdress;
 
+
 //    新建文件，将文件头和缓冲带的数据写入到文件中
     public SensorGlobalWriter(String fileName) {
         cuShakingData.setLinearAccData(null);
@@ -62,7 +63,8 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         cuShakingData.setTimeStamp(0);
         try {
 //            fileWriter = new FileWriter(new File(fileName));
-            fileWriter = new FileWriter(new File(Environment.getExternalStorageDirectory(), fileName));
+            fileWriter = new FileWriter(new File(Environment.getExternalStorageDirectory().getAbsolutePath()
+                    +File.separator+"DataCollector",fileName));
             fileWriter.write(cuShakingData.getCSVHead());
             fileWriter.flush();
 
@@ -70,6 +72,8 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
 
 //    设置文件名
@@ -80,7 +84,8 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
 //            File f = new File(filename);
 //            fileNameSet = true;
 //            Log.d(TAG,Environment.getDataDirectory().toString());
-            fileWriter = new FileWriter(new File(Environment.getExternalStorageDirectory(),fileName));
+            fileWriter = new FileWriter(new File(Environment.getExternalStorageDirectory().getAbsolutePath()
+                    +File.separator+"DataCollector",fileName));
             fileWriter.write(cuShakingData.getCSVHead());
             fileWriter.flush();
         } catch (IOException e) {

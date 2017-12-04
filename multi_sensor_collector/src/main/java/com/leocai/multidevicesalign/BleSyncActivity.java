@@ -34,6 +34,7 @@ import com.leocai.multidevicesalign.DemoCamService;
 import com.leocai.publiclibs.multidecicealign.MessageSend;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -76,14 +77,15 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
     Button btnStart;
     Button btnConnect;//两个按钮用于连接服务器和开始采集
+    Button btnTakePic;
     TextView tv_log;//用于显示当前状态
     EditText etFileName;
     EditText edt_masterAddress;
     EditText edt_frequency;
-//    EditText edt_camera_frequency;//采集数据需要的参数
+    EditText edt_camera_frequency;//采集数据需要的参数
     private String masterAddress;
     private int frequency;
-//    private int camera_frequency;
+    private int camera_frequency;
     private int countNum = 0;//记录拍照次数，可以在log中看到。
 
 
@@ -119,11 +121,10 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         tv_log = (TextView) findViewById(R.id.tv_log);
         btnStart = (Button) findViewById(R.id.btn_start);
         btnConnect = (Button) findViewById(R.id.btn_connect);
+        btnTakePic = (Button) findViewById(R.id.btn_take_pic);
         etFileName = (EditText) findViewById(R.id.et_filename);
         edt_masterAddress = (EditText) findViewById(R.id.edt_masterAddress);
-        edt_frequency = (EditText) findViewById(R.id.edt_sensor_frequency);
-//        edt_camera_frequency = (EditText)findViewById(R.id.edt_camera_frequency);
-        writeCSVSwitch = (Switch) findViewById(R.id.switch_writecsv);
+        edt_frequency = (EditText)findViewById(R.id.edt_camera_frequency);
         init();
 
         intent = new Intent(BleSyncActivity.this,DemoCamService.class);
@@ -168,6 +169,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
         connectBtnAction();//连接服务器
         startBtnAction();//开始采集
+        takePicBtnAction();
 
 
 
@@ -184,7 +186,22 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
         tv_log.setText("");
         currentState = STOPPED;
-        writeCSVSwitch.setChecked(readCSVSwitch());
+//        writeCSVSwitch.setChecked(readCSVSwitch());
+
+        File file =new File(Environment.getExternalStorageDirectory().getAbsolutePath(),"DataCollector");
+        if(!file.exists()) {
+            boolean fileMakeCorrect = file.mkdirs();
+        }
+    }
+
+    //点击拍照功能
+    private void takePicBtnAction(){
+        findViewById(R.id.btn_take_pic).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handler.post(runnable);
+            }
+        });
     }
 
 //  start按钮操作
@@ -218,7 +235,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         saveMasterAddress(masterAddress);
                         saveFrequncy(frequency);
 //                        saveCameraFrequency(camera_frequency);
-                        saveCSVSwitch(writeCSVSwitch.isChecked());
+//                        saveCSVSwitch(writeCSVSwitch.isChecked());
                         mySensorManager = new MySensorManager(BleSyncActivity.this);
                         try {
                             mySensorManager.setFileName(fileName);

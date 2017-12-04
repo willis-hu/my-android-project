@@ -34,63 +34,69 @@
         <!--android:textSize="30sp" />-->
 
     <Button
-        android:layout_width="wrap_content"
+        android:id="@+id/btn_connect"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start"
-        android:id="@+id/btn_start"
-        android:textSize="30sp"
-        android:layout_alignBottom="@+id/btn_connect"
-        android:layout_alignEnd="@+id/switch_writecsv"
-        android:layout_alignTop="@+id/btn_connect" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tv_log"
+        android:layout_marginTop="33dp"
+        android:text="connect"
+        android:textSize="30sp" />
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="connect"
-        android:id="@+id/btn_connect"
-        android:textSize="30sp"
-        android:layout_marginTop="123dp"
-        android:layout_below="@+id/tv_log" />
-
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Write CSV?(Unchecked Means Write Socket)"
-        android:id="@+id/switch_writecsv"
-        android:layout_below="@+id/btn_start"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp"
-        android:checked="true" />
-
-    <EditText
+        android:id="@+id/btn_start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/btn_take_pic"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="23dp"
+        android:text="Start"
+        android:textSize="30sp" />
+
+
+    <Button
+        android:id="@+id/btn_take_pic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/et_filename"
+        android:layout_alignParentStart="true"
+        android:text="Take Picture"
+        android:textSize="30sp" />
+
+
+    <EditText
         android:id="@+id/et_filename"
-        android:hint="File Name"
-        android:layout_below="@+id/switch_writecsv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/edt_masterAddress"
+        android:layout_alignParentStart="true"
         android:layout_centerHorizontal="true"
-        android:textSize="30sp"
-        android:gravity="center" />
-
+        android:gravity="center"
+        android:hint="File Name"
+        android:textSize="20sp" />
 
 
     <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/edt_masterAddress"
-        android:layout_below="@+id/et_filename"
-        android:hint="Master Address"
-        android:gravity="center"
-        android:layout_centerHorizontal="true" />
-
-    <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/edt_sensor_frequency"
-        android:hint="Sensor Frequency (HZ) (default 50HZ)"
+        android:layout_above="@+id/edt_camera_frequency"
+        android:layout_alignParentStart="true"
+        android:layout_centerHorizontal="true"
         android:gravity="center"
-        android:layout_below="@+id/edt_masterAddress"
-        android:layout_alignParentStart="true" />
+        android:hint="Master Address"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/edt_camera_frequency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:hint="Camera Frequency"
+        android:textSize="20sp" />
+
 
     <!--<EditText-->
         <!--android:layout_width="match_parent"-->
