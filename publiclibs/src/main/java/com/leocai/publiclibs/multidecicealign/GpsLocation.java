@@ -198,8 +198,8 @@ public class GpsLocation {
                     while (it.hasNext() && count <= maxSatellites) {
                         count++;
                         GpsSatellite s = it.next();
-                        satelliteInfo.append("," + s.getSnr());
-//                        if(it.hasNext())    satelliteInfo.append(",");
+                        satelliteInfo.append(s.getSnr());
+                        if(it.hasNext())    satelliteInfo.append("|");
                         noiseSignal += Double.valueOf(s.getSnr());
 //                        这里可以在log中显示具体的gps信息
 //                        getGpsStatelliteInfo(s);
