@@ -42,6 +42,10 @@ public class GpsLocation {
     private int satellliteNum;
     private double noiseSignal;
 
+    private double longitude;
+    private double latitude;
+    private double altitude;
+
 //    与定位相关的变量
     private Context myContext;
     private GpsLocation instance;
@@ -111,6 +115,9 @@ public class GpsLocation {
                 Log.i(TAG, "经度：" + location.getLongitude());
                 Log.i(TAG, "海拔：" + location.getAltitude());
                 Log.i(TAG, "时间：" + location.getTime());
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+                altitude = location.getAltitude();
             }
 
             @Override
@@ -157,6 +164,9 @@ public class GpsLocation {
         Log.i(TAG, "经度：" + location.getLongitude());
         Log.i(TAG, "海拔：" + location.getAltitude());
         Log.i(TAG, "时间：" + location.getTime());
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+        altitude = location.getAltitude();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
@@ -189,6 +199,7 @@ public class GpsLocation {
                         count++;
                         GpsSatellite s = it.next();
                         satelliteInfo.append("," + s.getSnr());
+//                        if(it.hasNext())    satelliteInfo.append(",");
                         noiseSignal += Double.valueOf(s.getSnr());
 //                        这里可以在log中显示具体的gps信息
 //                        getGpsStatelliteInfo(s);
@@ -196,9 +207,10 @@ public class GpsLocation {
 
                     }
                     satellliteNum = count;
-                    if (satellliteNum != 0){
-                        satelliteInfo.append(",total "+ satellliteNum +",average is "+Double.toString(noiseSignal/satellliteNum));
-                    }
+//                  下一段原本是在gps信息中添加平均数和总数
+                    /*if (satellliteNum != 0){
+                        satelliteInfo.append("|total "+ satellliteNum +"|average is "+Double.toString(noiseSignal/satellliteNum));
+                    }*/
 
                     socketConnect = messageSend.connect(masterAdress);
                     if (socketConnect){
@@ -206,6 +218,10 @@ public class GpsLocation {
                     }//用于发送gps数据到服务器端
                     cushakingData.setSatelliteInfo(satelliteInfo);
                     cushakingData.setSatelliteNum(satellliteNum);
+                    cushakingData.setLatitude(latitude);
+                    cushakingData.setLongitude(longitude);
+
+
 
 
 
@@ -298,6 +314,8 @@ public class GpsLocation {
     public void setMasterAdress(String masterAdress){
         this.masterAdress = masterAdress;
     }
+
+
 
 
 }

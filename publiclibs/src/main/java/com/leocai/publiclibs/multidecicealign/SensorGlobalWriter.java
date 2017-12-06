@@ -64,7 +64,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         try {
 //            fileWriter = new FileWriter(new File(fileName));
             fileWriter = new FileWriter(new File(Environment.getExternalStorageDirectory().getAbsolutePath()
-                    +File.separator+"DataCollector",fileName));
+                    +File.separator+"DataCollector",fileName+".csv"));
             fileWriter.write(cuShakingData.getCSVHead());
             fileWriter.flush();
 
@@ -85,7 +85,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
 //            fileNameSet = true;
 //            Log.d(TAG,Environment.getDataDirectory().toString());
             fileWriter = new FileWriter(new File(Environment.getExternalStorageDirectory().getAbsolutePath()
-                    +File.separator+"DataCollector",fileName));
+                    +File.separator+"DataCollector",fileName+".csv"));
             fileWriter.write(cuShakingData.getCSVHead());
             fileWriter.flush();
         } catch (IOException e) {
@@ -109,6 +109,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         myGpsLocation.setMyContext(context);
         myGpsLocation.isOpenGps();
         myGpsLocation.formListenerGetLocation();
+        myGpsLocation.getLocation();
         myGpsLocation.getGpsStatus();
 //        这里实现获取gps数据
         myGpsLocation.getStatusListener();

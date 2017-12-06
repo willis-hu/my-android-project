@@ -88,7 +88,7 @@ public class ShakingData implements Serializable, Cloneable {
 
     private double pressureData;
 
-    private double orientationData;
+    private double[] orientationData;
 
     private float[] usingAccData = new float[3];
     private float[] usingMagData = new float[3];
@@ -97,6 +97,9 @@ public class ShakingData implements Serializable, Cloneable {
     private GpsLocation myGpsLocation = new GpsLocation(myLocationManager);*/
     private StringBuffer satelliteInfo;
     private int satelliteNum;
+
+    private double latitude;
+    private double longitude;
 
 
 
@@ -153,6 +156,8 @@ public class ShakingData implements Serializable, Cloneable {
             if(v.length()>0) convertedData[i] = Double.parseDouble(v);
             else convertedData[i] = 0;
         }
+
+
         v = vals[cuIndex++];
         if(v.length()>0) lightData = Double.parseDouble(v);
         else lightData = 0;
@@ -161,9 +166,12 @@ public class ShakingData implements Serializable, Cloneable {
         if(v.length()>0) pressureData= Double.parseDouble(v);
         else pressureData = 0;
 
-        v = vals[cuIndex++];
-        if(v.length()>0) orientationData= Double.parseDouble(v);
-        else orientationData = 0;
+        orientationData = new double[3];
+        for (int i = 0;i < 3; i++){
+            v = vals[cuIndex ++];
+            if (v.length()>0) convertedData[i] = Double.parseDouble(v);
+            else convertedData[i] = 0;
+        }
 
         v = vals[cuIndex++];
         if(v.length()>0) resultantAccData= Double.parseDouble(v);
@@ -195,6 +203,7 @@ public class ShakingData implements Serializable, Cloneable {
         this.linearAccData = new double[3];
         this.gravityAccData = new double[3];
         this.gyrData = new double[3];
+        this.orientationData = new double[3];
         try {
             this.index = dataInputStream.readInt();
 //            一次读取四个字节，即读一个int数
@@ -203,11 +212,13 @@ public class ShakingData implements Serializable, Cloneable {
                 this.linearAccData[i] = dataInputStream.readDouble();
                 this.gyrData[i] = dataInputStream.readDouble();
                 this.gravityAccData[i] = dataInputStream.readDouble();
+                this.orientationData[i] = dataInputStream.readDouble();
 //                从sdBuffer中读取各个传感器数组的数据
             }
             this.lightData = dataInputStream.readDouble();
             this.pressureData = dataInputStream.readDouble();
-            this.orientationData = dataInputStream.readDouble();
+//            this.orientationData = dataInputStream.readDouble();
+//            for (int i =0;i < 3;i++){this.orientationData[i] = dataInputStream.readDouble();}
             this.resultantAccData = dataInputStream.readDouble();
             this.timeStamp = dataInputStream.readLong();
             this.dt = dataInputStream.readDouble();
@@ -234,10 +245,11 @@ public class ShakingData implements Serializable, Cloneable {
                 dataInputStream.writeDouble(this.linearAccData[i]);
                 dataInputStream.writeDouble(this.gyrData[i]);
                 dataInputStream.writeDouble(this.gravityAccData[i]);
+                dataInputStream.writeDouble(this.orientationData[i]);
             }
             dataInputStream.writeDouble(this.lightData);
             dataInputStream.writeDouble(this.pressureData);
-            dataInputStream.writeDouble(this.orientationData);
+//            dataInputStream.writeDouble(this.orientationData);
             dataInputStream.writeDouble(this.resultantAccData);
             dataInputStream.writeLong(this.timeStamp);
             dataInputStream.writeDouble(this.dt);
@@ -255,9 +267,10 @@ public class ShakingData implements Serializable, Cloneable {
         gravityAccData = new double[]{random.nextDouble() * 10, random.nextDouble() * 10, random.nextDouble() * 10};
         convertedData = new double[]{random.nextDouble() * 10, random.nextDouble() * 10, random.nextDouble() * 10};
         gyrData = new double[]{random.nextDouble() * 5, random.nextDouble() * 5, random.nextDouble() * 5};
+        orientationData = new double[]{random.nextDouble() * 10, random.nextDouble() * 10, random.nextDouble() * 10};
         lightData = random.nextDouble();
         pressureData = random.nextDouble();
-        orientationData = random.nextDouble();
+//        orientationData = random.nextDouble();
         index = random.nextInt(100);
         timeStamp = random.nextLong();
         dt = random.nextDouble();
@@ -327,7 +340,7 @@ public class ShakingData implements Serializable, Cloneable {
         this.pressureData = pressureData;
     }
 
-    public double getOrienData(){
+    public double[] getOrienData(){
         return orientationData;
     }
 
@@ -343,7 +356,10 @@ public class ShakingData implements Serializable, Cloneable {
             SensorManager.getRotationMatrix(R, null, usingAccData, usingMagData);
             SensorManager.getOrientation(R, values);
             values[0] = (float) Math.toDegrees(values[0]);
-            this.orientationData = values[0];
+//            this.orientationData = values;
+            for (int i = 0;i <3 ;i++){
+                this.orientationData[i] = Double.parseDouble(String.valueOf(values[i]));
+            }
         }
     }
 
@@ -439,8 +455,13 @@ public class ShakingData implements Serializable, Cloneable {
         info.append(",");
         info.append("PressureData");
         info.append(",");
-        info.append("OrientationData");
-        info.append(",");
+//        info.append("OrientationData");
+        //        info.append(",");
+        for (int i = 0; i < 3; i++) {
+            info.append("OrientationData");
+            info.append(i);
+            info.append(",");
+        }
 //        for (int i = 0; i < 3; i++) {
 //            info.append("ConvertedData");
 //            info.append(i);
@@ -448,11 +469,17 @@ public class ShakingData implements Serializable, Cloneable {
 //        }
 //        info.append("ResultantAcc");
 //        info.append(",");
-        info.append("Timestamp");
-        info.append(",");
 /*        info.append("dt");
         info.append(",");*/
         info.append("GpsInfo");
+        info.append(",");
+        info.append("GpsNumber");
+        info.append(",");
+        info.append("Latitude");
+        info.append(",");
+        info.append("Longitude");
+        info.append(",");
+        info.append("Timestamp");
         info.append("\n");
         return info.toString();
     }
@@ -489,8 +516,11 @@ public class ShakingData implements Serializable, Cloneable {
         info.append(",");
         info.append(this.pressureData);
         info.append(",");
-        info.append(this.orientationData);
-        info.append(",");
+        for (int i =0;i < 3;i++){
+            if (orientationData != null)
+                info.append(this.orientationData[i]);
+            info.append(",");
+        }
 //        for (int i = 0; i < 3; i++) {
 //            if(convertedData!=null)
 //                info.append(this.convertedData[i]);
@@ -498,8 +528,6 @@ public class ShakingData implements Serializable, Cloneable {
 //        }
 //        info.append(resultantAccData);
 //        info.append(",");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
-        info.append(sdf.format(new Date(System.currentTimeMillis())));
 /*        info.append(",");
         info.append(this.dt);*/
         /*if (myGpsLocation != null) {
@@ -511,10 +539,17 @@ public class ShakingData implements Serializable, Cloneable {
                 Log.i(TAG,"satelliteNum is not 0");
 //            Log.i(TAG,"myGpsLocation is not null");
         }*/
-        info.append(",");
+//        info.append(",");
         info.append(satelliteInfo);
         info.append(",");
         info.append(satelliteNum);
+        info.append(",");
+        info.append(latitude);
+        info.append(",");
+        info.append(longitude);
+        info.append(",");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+        info.append(sdf.format(new Date(System.currentTimeMillis())));
 
         info.append("\n");
 
@@ -568,6 +603,10 @@ public class ShakingData implements Serializable, Cloneable {
     public void setSatelliteNum(int satellitenum){
         satelliteNum = satellitenum;
     }
+
+    public void setLatitude(double latitude){this.latitude = latitude;}
+
+    public void setLongitude(double longitude){this.longitude = longitude;}
 
     public StringBuffer getSatelliteInfo(){
         return satelliteInfo;
