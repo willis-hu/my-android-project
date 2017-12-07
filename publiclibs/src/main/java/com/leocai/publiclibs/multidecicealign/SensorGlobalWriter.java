@@ -252,5 +252,11 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         myGpsLocation.setMasterAdress(masterAdress);
     }
 
+    public StringBuffer getGps(){
+        return cuShakingData.getSatelliteInfo();
+    }
 
+    public double[] getLatitude(){
+        return cuShakingData.getLatitude();
+    }
 }

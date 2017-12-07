@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -79,6 +80,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     Button btnConnect;//两个按钮用于连接服务器和开始采集
     Button btnTakePic;
     TextView tv_log;//用于显示当前状态
+    TextView tv_infoGps;
+    TextView tv_infoLati;
     EditText etFileName;
     EditText edt_masterAddress;
     EditText edt_frequency;
@@ -100,6 +103,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     Runnable runnable;
     Runnable runRemove;//用于拍照控制
     Runnable keepWifiConnect;
+    Runnable showGps;
 
 //    Handler handler_connect;
 //    Runnable runConnect;//用来监控服务器端发送的消息
@@ -119,6 +123,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         setContentView(R.layout.activity_ble_sync);
 
         tv_log = (TextView) findViewById(R.id.tv_log);
+        tv_infoGps = (TextView) findViewById(R.id.info_gps);//显示gps信息和经纬度
+        tv_infoLati = (TextView) findViewById(R.id.info_latitude);
         btnStart = (Button) findViewById(R.id.btn_start);
         btnConnect = (Button) findViewById(R.id.btn_connect);
         btnTakePic = (Button) findViewById(R.id.btn_take_pic);
@@ -160,6 +166,20 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                 handler.postDelayed(this,2000);
             }
         };
+
+        showGps = new Runnable() {
+            @Override
+            public void run() {
+                double[] latilongi = mySensorManager.getLatitude();
+                tv_infoGps.setText("GPS :" + mySensorManager.getGps());
+                tv_infoLati.setText("latitude:" + latilongi[0]+"\nlongitude:"+latilongi[1]);
+                handler.postDelayed(this,2000);
+            }
+        };
+
+
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     public void init(){
@@ -259,6 +279,9 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         edt_frequency.setEnabled(false);
 //                        edt_camera_frequency.setEnabled(false);
                         showLog("Sensor Listener Running");
+
+                        handler.postDelayed(showGps,2000);
+
                         break;
                     case STARTING:
                         if(connected){
@@ -272,6 +295,8 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         etFileName.setEnabled(true);
                         edt_masterAddress.setEnabled(true);
                         edt_frequency.setEnabled(true);
+
+                        handler.removeCallbacks(showGps);
 //                        edt_camera_frequency.setEnabled(true);
                         showLog("Sensor Listener Stopped");
                 }

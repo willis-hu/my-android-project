@@ -615,4 +615,11 @@ public class ShakingData implements Serializable, Cloneable {
     public int getSatelliteNum(){
         return satelliteNum;
     }
+
+    public double[] getLatitude(){
+        double[] latilongi =new double[2];
+        latilongi[0] = latitude;
+        latilongi[1] = longitude;
+        return latilongi;
+    }
 }
