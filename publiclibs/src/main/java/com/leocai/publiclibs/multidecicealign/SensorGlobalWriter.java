@@ -137,7 +137,7 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
 //                }
                     while (!stop) {
 //                        这里添加getSatelliteInfo为空时不执行
-                        if (cuShakingData.getLinearAccData() == null) continue;
+                        if (cuShakingData.getLatitude()[1] == 0.0) continue;
 //                    Log.d(TAG,"dection");
 //                    cuShakingData.transform();
 //                    观察者模式，
