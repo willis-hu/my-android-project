@@ -42,6 +42,12 @@ public class GpsLocation {
     private int satellliteNum;
     private double noiseSignal;
 
+    private int MaxGps = 100;
+    private int[] gpsSnr;
+    private int[] gpsAzimuth;
+    private int[] gpsElevation;
+    private int[] gpsPrn;
+
     private double longitude;
     private double latitude;
     private double altitude;
@@ -78,6 +84,11 @@ public class GpsLocation {
     public GpsLocation(LocationManager thisLocationManager) {
         satelliteInfo = new StringBuffer();
         locationManager = thisLocationManager;
+
+        gpsSnr = new int[MaxGps];
+        gpsPrn = new int[MaxGps];
+        gpsAzimuth = new int[MaxGps];
+        gpsElevation = new int[MaxGps];
 
     }
 
@@ -196,15 +207,22 @@ public class GpsLocation {
                     Iterator<GpsSatellite> it = gpsStauts.getSatellites().iterator();//创建一个迭代器保存所有卫星
                     int count = 0;
                     while (it.hasNext() && count <= maxSatellites) {
-                        count++;
                         GpsSatellite s = it.next();
-                        satelliteInfo.append(s.getSnr());
-                        if(it.hasNext())    satelliteInfo.append("|");
+                        satelliteInfo.append((int)s.getSnr());//信噪比
+                        satelliteInfo.append("|"+(int)s.getAzimuth());//方位角
+                        satelliteInfo.append("|"+(int)s.getElevation());//高度
+                        satelliteInfo.append("|"+s.getPrn());//噪声随机码
+                        satelliteInfo.append("|"+s.hasAlmanac());//是否有年历表
+                        satelliteInfo.append("|"+s.hasEphemeris());//是否有星历表
+                        if(it.hasNext())    satelliteInfo.append(",");
                         noiseSignal += Double.valueOf(s.getSnr());
-//                        这里可以在log中显示具体的gps信息
-//                        getGpsStatelliteInfo(s);
-//                        Log.i(TAG, satelliteInfo.toString());
 
+                        gpsPrn[count] = s.getPrn();
+                        gpsSnr[count] = s.getPrn();
+                        gpsAzimuth[count] = (int) s.getAzimuth();
+                        gpsElevation[count] = (int) s.getElevation();
+
+                        count++;
                     }
                     satellliteNum = count;
 //                  下一段原本是在gps信息中添加平均数和总数
@@ -221,8 +239,10 @@ public class GpsLocation {
                     cushakingData.setLatitude(latitude);
                     cushakingData.setLongitude(longitude);
 
-
-
+                    cushakingData.setGpsSnr(gpsSnr);
+                    cushakingData.setGpsPrn(gpsPrn);
+                    cushakingData.setGpsAzimuth(gpsAzimuth);
+                    cushakingData.setGpsElevation(gpsElevation);
 
 
                     Log.i(TAG, "搜索到：" + count + "颗卫星");

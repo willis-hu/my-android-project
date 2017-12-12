@@ -8,7 +8,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.widget.ScrollerCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -124,6 +126,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
 
         tv_log = (TextView) findViewById(R.id.tv_log);
         tv_infoGps = (TextView) findViewById(R.id.info_gps);//显示gps信息和经纬度
+        tv_infoGps.setMovementMethod(ScrollingMovementMethod.getInstance());//设置内容可以滚动
         tv_infoLati = (TextView) findViewById(R.id.info_latitude);
         btnStart = (Button) findViewById(R.id.btn_start);
         btnConnect = (Button) findViewById(R.id.btn_connect);

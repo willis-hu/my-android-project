@@ -93,6 +93,12 @@ public class ShakingData implements Serializable, Cloneable {
     private float[] usingAccData = new float[3];
     private float[] usingMagData = new float[3];
 
+    private int MaxGps = 100;
+    private int[] gpsSnr = new int[MaxGps];
+    private int[] gpsAzimuth = new int[MaxGps];
+    private int[] gpsElevation = new int[MaxGps];
+    private int[] gpsPrn = new int[MaxGps];
+
 /*    private LocationManager myLocationManager;
     private GpsLocation myGpsLocation = new GpsLocation(myLocationManager);*/
     private StringBuffer satelliteInfo;
@@ -471,15 +477,15 @@ public class ShakingData implements Serializable, Cloneable {
 //        info.append(",");
 /*        info.append("dt");
         info.append(",");*/
-        info.append("GpsInfo");
-        info.append(",");
-        info.append("GpsNumber");
-        info.append(",");
         info.append("Latitude");
         info.append(",");
         info.append("Longitude");
         info.append(",");
-        info.append("Timestamp");
+        info.append("GpsNumber");
+        info.append(",");
+        info.append("GpsInfo");
+//        info.append(",");
+//        info.append("Timestamp");
         info.append("\n");
         return info.toString();
     }
@@ -540,16 +546,16 @@ public class ShakingData implements Serializable, Cloneable {
 //            Log.i(TAG,"myGpsLocation is not null");
         }*/
 //        info.append(",");
-        info.append(satelliteInfo);
-        info.append(",");
-        info.append(satelliteNum);
-        info.append(",");
         info.append(latitude);
         info.append(",");
         info.append(longitude);
         info.append(",");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
-        info.append(sdf.format(new Date(System.currentTimeMillis())));
+        info.append(satelliteNum);
+        info.append(",");
+        info.append(satelliteInfo);
+//        info.append(",");
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+//        info.append(sdf.format(new Date(System.currentTimeMillis())));
 
         info.append("\n");
 
@@ -604,6 +610,30 @@ public class ShakingData implements Serializable, Cloneable {
         satelliteNum = satellitenum;
     }
 
+    public void setGpsSnr(int[] gpsSnr){
+        for(int i=0;i<gpsSnr.length;i++){
+            this.gpsSnr[i] = gpsSnr[i];
+        }
+    }
+
+    public void setGpsPrn(int[] gpsPrn){
+        for(int i=0;i<gpsPrn.length;i++){
+            this.gpsPrn[i] = gpsPrn[i];
+        }
+    }
+
+    public void setGpsAzimuth(int[] gpsAzimuth){
+        for(int i=0;i<gpsAzimuth.length;i++){
+            this.gpsAzimuth[i] = gpsAzimuth[i];
+        }
+    }
+
+    public void setGpsElevation(int[] gpsElevation){
+        for(int i=0;i<gpsElevation.length;i++){
+            this.gpsElevation[i] = gpsElevation[i];
+        }
+    }
+
     public void setLatitude(double latitude){this.latitude = latitude;}
 
     public void setLongitude(double longitude){this.longitude = longitude;}
@@ -611,6 +641,11 @@ public class ShakingData implements Serializable, Cloneable {
     public StringBuffer getSatelliteInfo(){
         return satelliteInfo;
     }
+
+    public int[] getGpsSnr(){return gpsSnr;}
+    public int[] getGpsPrn(){return gpsPrn;}
+    public int[] getGpsAzimuth(){return gpsAzimuth;}
+    public int[] getGpsElevation(){return gpsElevation;}
 
     public int getSatelliteNum(){
         return satelliteNum;
