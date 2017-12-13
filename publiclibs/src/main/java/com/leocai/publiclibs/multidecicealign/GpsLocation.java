@@ -208,9 +208,9 @@ public class GpsLocation {
                     int count = 0;
                     while (it.hasNext() && count <= maxSatellites) {
                         GpsSatellite s = it.next();
-                        satelliteInfo.append((int)s.getSnr());//信噪比
-                        satelliteInfo.append("|"+(int)s.getAzimuth());//方位角
-                        satelliteInfo.append("|"+(int)s.getElevation());//高度
+                        satelliteInfo.append(s.getSnr());//信噪比
+                        satelliteInfo.append("|"+s.getAzimuth());//方位角
+                        satelliteInfo.append("|"+s.getElevation());//高度
                         satelliteInfo.append("|"+s.getPrn());//噪声随机码
                         satelliteInfo.append("|"+s.hasAlmanac());//是否有年历表
                         satelliteInfo.append("|"+s.hasEphemeris());//是否有星历表
@@ -218,7 +218,7 @@ public class GpsLocation {
                         noiseSignal += Double.valueOf(s.getSnr());
 
                         gpsPrn[count] = s.getPrn();
-                        gpsSnr[count] = s.getPrn();
+                        gpsSnr[count] = (int) s.getSnr();
                         gpsAzimuth[count] = (int) s.getAzimuth();
                         gpsElevation[count] = (int) s.getElevation();
 

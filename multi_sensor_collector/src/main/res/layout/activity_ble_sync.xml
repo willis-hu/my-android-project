@@ -30,7 +30,7 @@
         android:layout_below="@id/btn_connect"
         android:isScrollContainer="true"
         android:singleLine="false"
-        android:maxLines="10"
+        android:maxLines="12"
         android:textSize="15sp"
         android:hint="gps information"/>
 

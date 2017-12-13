@@ -1,10 +1,12 @@
 package com.leocai.multidevicesalign;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -42,8 +44,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
@@ -106,6 +110,12 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
     Runnable runRemove;//用于拍照控制
     Runnable keepWifiConnect;
     Runnable showGps;
+
+    private String gpsSnr;
+    private String gpsPrn;
+    private String gpsAzimuth;
+    private String gpsElevation;
+
 
 //    Handler handler_connect;
 //    Runnable runConnect;//用来监控服务器端发送的消息
@@ -171,10 +181,23 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         };
 
         showGps = new Runnable() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void run() {
                 double[] latilongi = mySensorManager.getLatitude();
-                tv_infoGps.setText("GPS :" + mySensorManager.getGps());
+                gpsSnr = new String();
+                gpsPrn = new String();
+                gpsAzimuth = new String();
+                gpsElevation = new String();
+                for(int i=0;i<mySensorManager.getSatelliteNum();i++){
+                    gpsSnr = gpsSnr + mySensorManager.getGpsSnr()[i]+",";
+                    gpsPrn = gpsPrn + mySensorManager.getGpsPrn()[i]+",";
+                    gpsAzimuth = gpsAzimuth + mySensorManager.getGpsAzimuth()[i]+",";
+                    gpsElevation = gpsElevation + mySensorManager.getGpsElevation()[i]+",";
+
+                }
+
+                tv_infoGps.setText("SatelliteNum:"+mySensorManager.getSatelliteNum()+"\nSnr:" + gpsSnr+"\nAzi:"+gpsAzimuth+"\nEle:"+gpsElevation+"\nPrn:" + gpsPrn);
                 tv_infoLati.setText("latitude:" + latilongi[0]+"\nlongitude:"+latilongi[1]);
                 handler.postDelayed(this,2000);
             }
@@ -298,6 +321,10 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                         etFileName.setEnabled(true);
                         edt_masterAddress.setEnabled(true);
                         edt_frequency.setEnabled(true);
+
+                        folderScan(Environment.getExternalStorageDirectory().getAbsolutePath()
+                                +File.separator+"DataCollector");
+
 
                         handler.removeCallbacks(showGps);
 //                        edt_camera_frequency.setEnabled(true);
@@ -629,6 +656,35 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
             }
         };
         thread.start();
+    }
+
+    //通知系统扫描文件
+    public void notifySystemToScan(String filePath) {
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File file = new File(filePath);
+
+        Uri uri = Uri.fromFile(file);
+        intent.setData(uri);
+        this.getApplication().sendBroadcast(intent);
+    }
+
+    public void folderScan(String path) {
+        File file = new File(path);
+        if (file.isDirectory()) {
+            File[] array = file.listFiles();
+
+            for (int i = 0; i < array.length; i++) {
+                File f = array[i];
+                if (f.isFile()) {// FILE TYPE
+                    String name = f.getName();
+// if(name.contains(".mp3")){
+                    notifySystemToScan(f.getAbsolutePath());
+// }
+                } else {// FOLDER TYPE
+                    folderScan(f.getAbsolutePath());
+                }
+            }
+        }
     }
 
 }

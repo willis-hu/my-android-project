@@ -112,7 +112,14 @@ public class MySensorManager {
         return sensorGlobalWriter.getGps();
     }
 
+    public int getSatelliteNum(){return sensorGlobalWriter.getSatelliteNum();}
+
     public double[] getLatitude(){
         return sensorGlobalWriter.getLatitude();
     }
+
+    public int[] getGpsSnr(){return sensorGlobalWriter.getGpsSnr();}
+    public int[] getGpsPrn(){return sensorGlobalWriter.getGpsPrn();}
+    public int[] getGpsAzimuth(){return sensorGlobalWriter.getGpsAzimuth();}
+    public int[] getGpsElevation(){return sensorGlobalWriter.getGpsElevation();}
 }

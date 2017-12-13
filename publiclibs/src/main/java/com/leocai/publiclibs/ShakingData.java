@@ -481,6 +481,8 @@ public class ShakingData implements Serializable, Cloneable {
         info.append(",");
         info.append("Longitude");
         info.append(",");
+        info.append("Time");
+        info.append(",");
         info.append("GpsNumber");
         info.append(",");
         info.append("GpsInfo");
@@ -550,11 +552,14 @@ public class ShakingData implements Serializable, Cloneable {
         info.append(",");
         info.append(longitude);
         info.append(",");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        info.append(sdf.format(new Date(System.currentTimeMillis())));
+        info.append(",");
         info.append(satelliteNum);
         info.append(",");
         info.append(satelliteInfo);
 //        info.append(",");
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 //        info.append(sdf.format(new Date(System.currentTimeMillis())));
 
         info.append("\n");
@@ -641,6 +646,7 @@ public class ShakingData implements Serializable, Cloneable {
     public StringBuffer getSatelliteInfo(){
         return satelliteInfo;
     }
+
 
     public int[] getGpsSnr(){return gpsSnr;}
     public int[] getGpsPrn(){return gpsPrn;}

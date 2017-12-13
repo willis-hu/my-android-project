@@ -256,7 +256,14 @@ public class SensorGlobalWriter extends Observable implements SensorEventListene
         return cuShakingData.getSatelliteInfo();
     }
 
+    public int getSatelliteNum(){return cuShakingData.getSatelliteNum();}
+
     public double[] getLatitude(){
         return cuShakingData.getLatitude();
     }
+
+    public int[] getGpsSnr(){return cuShakingData.getGpsSnr();}
+    public int[] getGpsPrn(){return cuShakingData.getGpsPrn();}
+    public int[] getGpsAzimuth(){return cuShakingData.getGpsAzimuth();}
+    public int[] getGpsElevation(){return cuShakingData.getGpsElevation();}
 }
