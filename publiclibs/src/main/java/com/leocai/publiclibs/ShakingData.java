@@ -1,14 +1,9 @@
 package com.leocai.publiclibs;
 
-import android.content.Context;
-import android.graphics.drawable.GradientDrawable;
 import android.hardware.SensorManager;
-import android.location.LocationManager;
-import android.provider.Settings;
 import android.util.Log;
 
 import com.dislab.leocai.spacesync.utils.MatrixUtils;
-import com.leocai.publiclibs.multidecicealign.GpsLocation;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -98,10 +93,12 @@ public class ShakingData implements Serializable, Cloneable {
     private int[] gpsAzimuth = new int[MaxGps];
     private int[] gpsElevation = new int[MaxGps];
     private int[] gpsPrn = new int[MaxGps];
+    private int totalSnr;
 
 /*    private LocationManager myLocationManager;
     private GpsLocation myGpsLocation = new GpsLocation(myLocationManager);*/
     private StringBuffer satelliteInfo;
+    private boolean satelliteChange = false;
     private int satelliteNum;
 
     private double latitude;
@@ -485,6 +482,8 @@ public class ShakingData implements Serializable, Cloneable {
         info.append(",");
         info.append("GpsNumber");
         info.append(",");
+        info.append("TotalSnr");
+        info.append(",");
         info.append("GpsInfo");
 //        info.append(",");
 //        info.append("Timestamp");
@@ -552,17 +551,30 @@ public class ShakingData implements Serializable, Cloneable {
         info.append(",");
         info.append(longitude);
         info.append(",");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         info.append(sdf.format(new Date(System.currentTimeMillis())));
+//        info.append(System.currentTimeMillis());
         info.append(",");
         info.append(satelliteNum);
         info.append(",");
-        info.append(satelliteInfo);
+        info.append(totalSnr);
+        info.append(",");
+        while (!satelliteChange);
+        info.append(satelliteInfo.toString());
 //        info.append(",");
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 //        info.append(sdf.format(new Date(System.currentTimeMillis())));
 
         info.append("\n");
+
+        if(satelliteNum != 0 && satelliteInfo.toString().length() == 0){
+            if(!satelliteChange)  Log.i(TAG,"satellite has not been changed");
+            String str = satelliteInfo.toString();
+            int i = str.length();
+            Log.i(TAG,"this is a null problem");
+        }
+
+        satelliteChange = false;
 
         return info.toString();
     }
@@ -607,7 +619,8 @@ public class ShakingData implements Serializable, Cloneable {
     }*/
 
     public void setSatelliteInfo(StringBuffer satelliteinfo){
-        satelliteInfo = satelliteinfo;
+        this.satelliteInfo = satelliteinfo;
+        satelliteChange = true;
 //        Log.i(TAG,"satelliteInfo are " + satelliteinfo.toString());
     }
 
@@ -663,4 +676,6 @@ public class ShakingData implements Serializable, Cloneable {
         latilongi[1] = longitude;
         return latilongi;
     }
+
+    public void setTotalSnr(int snr){this.totalSnr = snr;}
 }

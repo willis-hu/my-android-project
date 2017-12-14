@@ -39,7 +39,8 @@ public class GpsLocation {
 
 //    需要发送的数据
     private StringBuffer satelliteInfo;
-    private int satellliteNum;
+    private int satelliteNum;
+    private int totalSnr;
     private double noiseSignal;
 
     private int MaxGps = 100;
@@ -188,7 +189,7 @@ public class GpsLocation {
                 Log.i("debug","this is getStatusListener");
                 satelliteInfo.setLength(0);
                 noiseSignal = (double) 0;
-                satellliteNum = 0;
+                satelliteNum = 0;
                 if (event == GpsStatus.GPS_EVENT_FIRST_FIX) {
                     Log.i(TAG, "第一次定位");
                 } else if (event == GpsStatus.GPS_EVENT_SATELLITE_STATUS) {
@@ -206,6 +207,7 @@ public class GpsLocation {
                     int maxSatellites = gpsStauts.getMaxSatellites();
                     Iterator<GpsSatellite> it = gpsStauts.getSatellites().iterator();//创建一个迭代器保存所有卫星
                     int count = 0;
+                    int sumSnr =0;
                     while (it.hasNext() && count <= maxSatellites) {
                         GpsSatellite s = it.next();
                         satelliteInfo.append(s.getSnr());//信噪比
@@ -214,7 +216,7 @@ public class GpsLocation {
                         satelliteInfo.append("|"+s.getPrn());//噪声随机码
                         satelliteInfo.append("|"+s.hasAlmanac());//是否有年历表
                         satelliteInfo.append("|"+s.hasEphemeris());//是否有星历表
-                        if(it.hasNext())    satelliteInfo.append(",");
+                        if(it.hasNext())    satelliteInfo.append("#");
                         noiseSignal += Double.valueOf(s.getSnr());
 
                         gpsPrn[count] = s.getPrn();
@@ -223,8 +225,10 @@ public class GpsLocation {
                         gpsElevation[count] = (int) s.getElevation();
 
                         count++;
+                        sumSnr+=s.getSnr();
                     }
-                    satellliteNum = count;
+                    satelliteNum = count;
+                    totalSnr = sumSnr;
 //                  下一段原本是在gps信息中添加平均数和总数
                     /*if (satellliteNum != 0){
                         satelliteInfo.append("|total "+ satellliteNum +"|average is "+Double.toString(noiseSignal/satellliteNum));
@@ -234,10 +238,15 @@ public class GpsLocation {
                     if (socketConnect){
                         messageSend.send(satelliteInfo);
                     }//用于发送gps数据到服务器端
+                    cushakingData.setSatelliteNum(satelliteNum);
                     cushakingData.setSatelliteInfo(satelliteInfo);
-                    cushakingData.setSatelliteNum(satellliteNum);
+                    cushakingData.setTotalSnr(totalSnr);
                     cushakingData.setLatitude(latitude);
                     cushakingData.setLongitude(longitude);
+
+                    if(satelliteNum != 0 && satelliteInfo.length() == 0){
+                        Log.i(TAG,"this is a null problem");
+                    }
 
                     cushakingData.setGpsSnr(gpsSnr);
                     cushakingData.setGpsPrn(gpsPrn);
@@ -317,7 +326,7 @@ public class GpsLocation {
     }
 
     public int getSatellliteNum() {
-        return satellliteNum;
+        return satelliteNum;
     }
 
     public void stopListener() throws IOException {
