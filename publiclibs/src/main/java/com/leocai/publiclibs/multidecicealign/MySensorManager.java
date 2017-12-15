@@ -108,7 +108,7 @@ public class MySensorManager {
         this.frequency = frequency;
     }
 
-    public StringBuffer getGps(){
+    public String getGps(){
         return sensorGlobalWriter.getGps();
     }
 

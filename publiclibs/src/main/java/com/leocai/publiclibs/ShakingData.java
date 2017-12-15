@@ -97,8 +97,9 @@ public class ShakingData implements Serializable, Cloneable {
 
 /*    private LocationManager myLocationManager;
     private GpsLocation myGpsLocation = new GpsLocation(myLocationManager);*/
-    private StringBuffer satelliteInfo;
+    private String satelliteInfo;
     private boolean satelliteChange = false;
+    private byte[] lock = new byte[0];
     private int satelliteNum;
 
     private double latitude;
@@ -559,17 +560,14 @@ public class ShakingData implements Serializable, Cloneable {
         info.append(",");
         info.append(totalSnr);
         info.append(",");
-        while (!satelliteChange);
-        info.append(satelliteInfo.toString());
-//        info.append(",");
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-//        info.append(sdf.format(new Date(System.currentTimeMillis())));
+        info.append(satelliteInfo);
+
 
         info.append("\n");
 
-        if(satelliteNum != 0 && satelliteInfo.toString().length() == 0){
+        if(satelliteNum != 0 && satelliteInfo.length() == 0){
             if(!satelliteChange)  Log.i(TAG,"satellite has not been changed");
-            String str = satelliteInfo.toString();
+            String str = satelliteInfo;
             int i = str.length();
             Log.i(TAG,"this is a null problem");
         }
@@ -618,10 +616,9 @@ public class ShakingData implements Serializable, Cloneable {
         myGpsLocation.getStatusListener();
     }*/
 
-    public void setSatelliteInfo(StringBuffer satelliteinfo){
-        this.satelliteInfo = satelliteinfo;
-        satelliteChange = true;
-//        Log.i(TAG,"satelliteInfo are " + satelliteinfo.toString());
+    public void setSatelliteInfo(String satelliteinfo){
+            this.satelliteInfo = satelliteinfo;
+            satelliteChange = true;
     }
 
     public void setSatelliteNum(int satellitenum){
@@ -656,7 +653,7 @@ public class ShakingData implements Serializable, Cloneable {
 
     public void setLongitude(double longitude){this.longitude = longitude;}
 
-    public StringBuffer getSatelliteInfo(){
+    public String getSatelliteInfo(){
         return satelliteInfo;
     }
 

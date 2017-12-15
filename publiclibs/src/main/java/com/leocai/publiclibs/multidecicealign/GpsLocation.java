@@ -239,7 +239,7 @@ public class GpsLocation {
                         messageSend.send(satelliteInfo);
                     }//用于发送gps数据到服务器端
                     cushakingData.setSatelliteNum(satelliteNum);
-                    cushakingData.setSatelliteInfo(satelliteInfo);
+                    cushakingData.setSatelliteInfo(satelliteInfo.toString());
                     cushakingData.setTotalSnr(totalSnr);
                     cushakingData.setLatitude(latitude);
                     cushakingData.setLongitude(longitude);
