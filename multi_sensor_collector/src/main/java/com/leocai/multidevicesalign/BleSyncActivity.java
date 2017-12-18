@@ -1,15 +1,20 @@
 package com.leocai.multidevicesalign;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.ScrollerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
@@ -234,6 +239,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
         currentState = STOPPED;
 //        writeCSVSwitch.setChecked(readCSVSwitch());
 
+        requestPermission();
         File file =new File(Environment.getExternalStorageDirectory().getAbsolutePath(),"DataCollector");
         if(!file.exists()) {
             boolean fileMakeCorrect = file.mkdirs();
@@ -684,6 +690,38 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                     folderScan(f.getAbsolutePath());
                 }
             }
+        }
+    }
+
+    private void requestPermission() {
+        //判断Android版本是否大于23
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int checkCallPhonePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (checkCallPhonePermission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 111);
+                return;
+            } else {
+                //已有权限
+            }
+        } else {
+            //API 版本在23以下
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+    {
+        switch (requestCode) {
+            case 111:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                }
+                else {
+                    // Permission Denied
+                    Toast.makeText(BleSyncActivity.this, "尚未获取存储权限", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
