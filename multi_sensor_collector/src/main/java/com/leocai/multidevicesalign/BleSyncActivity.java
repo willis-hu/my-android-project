@@ -704,6 +704,7 @@ public class BleSyncActivity extends AppCompatActivity implements Observer {
                 //已有权限
             }
         } else {
+            Toast.makeText(BleSyncActivity.this,"系统版本太低",Toast.LENGTH_SHORT).show();
             //API 版本在23以下
         }
     }
